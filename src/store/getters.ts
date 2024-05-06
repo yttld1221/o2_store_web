@@ -1,0 +1,1 @@
+export  const getMenus = (state: any) => state.menu.menus

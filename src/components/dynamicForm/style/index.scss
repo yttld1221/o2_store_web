@@ -1,0 +1,75 @@
+.dynamic-form {
+  .col-item {
+    display: flex;
+  }
+  .form-row-bar {
+    display: flex;
+    width: 100%;
+    // align-items: center;
+  }
+  .form-item {
+    width: 100%;
+  }
+  .col-bar {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    width: 100%;
+    .col-bar-label {
+      font-weight: 400;
+      color: #333333;
+      position: relative;
+      display: inline-block;
+      flex: 0 0 auto;
+      margin: 0 10px;
+      font-size: 14px;
+      line-height: 32px;
+      text-align: right;
+      &.required::before {
+        content: '*';
+        color: #f56c6c;
+        margin-right: 4px;
+      }
+    }
+  }
+}
+.el-form-item--small .el-form-item__content, .el-form-item--small .el-form-item__label {
+  line-height: 32px;
+  font-size: 14px;
+  .el-input--small {
+    font-size: 14px;
+  }
+}
+.el-input--small .el-input__inner {
+  line-height: 32px;
+  height: 32px;
+}
+.el-range-editor--small.el-input__wrapper{
+  line-height: 32px;
+  height: 32px;
+}
+.el-radio.el-radio--small {
+  height: 32px;
+}
+.el-checkbox.el-checkbox--small {
+  height: 32px;
+}
+.el-switch--small {
+  height: 32px;
+}
+.el-rate--small {
+  height: 24px;
+}
+.el-select {
+  width: 100%;
+  display: block;
+}
+
+.el-form-item__content {
+  width: 100%;
+  margin-left: 0 !important;
+  /**日期选择组件，宽度自适应 */
+  .el-date-editor.el-input {
+    width: inherit;
+  }
+}

@@ -1,0 +1,333 @@
+@font-face {
+  font-family: "element-icons";
+  src: url("./fonts/element-icons.woff") format("woff"),
+    url("./fonts/element-icons.ttf") format("truetype");
+  font-weight: normal;
+  font-display: "auto";
+  font-style: normal;
+}
+
+[class^="el-icon-"],
+[class*=" el-icon-"] {
+  font-family: "element-icons" !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: baseline;
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.el-button--primary {
+  color: #fff;
+  background-color: #1966FF;
+  border-color: #1966FF;
+  &:hover,
+  &:focus {
+    background: #1966FF;
+    border-color: #1966FF;
+    color: #fff;
+  }
+}
+
+.el-button--text:focus {
+  color: #1966FF;
+}
+
+.el-button--default {
+  color: #606266;
+  background-color: #fff;
+  border-color: #dcdfe6;
+  &:hover,
+  &:focus {
+    color: #1966FF;
+    border-color: #ccd5f8;
+    background-color: #eef1fd;
+  }
+}
+
+.el-button--text {
+  color: #1966FF;
+  &:hover {
+    color: #1966FF;
+  }
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.el-dialog__footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.el-pagination {
+  .el-icon-arrow-left,
+  .el-icon-arrow-right {
+    width: 100%;
+  }
+}
+
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+  background: #1966FF;
+}
+
+.el-pager {
+  li.active {
+    color: #1966FF;
+    cursor: default;
+  }
+  li {
+    &:hover {
+      color: #79bbff;
+    }
+  }
+}
+
+.el-select .el-input.is-focus .el-input__inner {
+  border-color: #1966FF;
+}
+
+.el-select-dropdown__item.selected {
+  color: #1966FF;
+}
+
+.el-radio__input.is-checked .el-radio__inner {
+  border-color: #1966FF;
+  background: #1966FF;
+}
+
+.el-radio__input.is-checked + .el-radio__label {
+  color: #1966FF;
+}
+
+.el-textarea__inner:focus {
+  border-color: #1966FF;
+}
+
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+  background-color: #fefefe;
+}
+
+/*定义滚动条轨道 内阴影+圆角*/
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px #999;
+  border-radius: 10px;
+  background-color: #fefefe;
+}
+
+/*定义滑块 内阴影+圆角*/
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px #999;
+  background-color: #999;
+}
+
+.color-red {
+  color: red !important;
+}
+.color-orange {
+  color: #ff9800 !important;
+}
+.color-blue {
+  color: #1966FF !important;
+}
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+.font-bold {
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 16px;
+}
+.el-checkbox__input.is-checked {
+  .el-checkbox__inner {
+    background-color: #1966FF;
+    border-color: #1966FF;
+  }
+}
+.el-message-box__btns {
+  .el-button--primary {
+    border-color: #1966FF;
+    background: #1966FF;
+    color: #fff;
+  }
+}
+.el-icon--left {
+  top: 2px !important;
+}
+.el-icon--right {
+  top: 2px !important;
+}
+.el-upload-list__item-name {
+  white-space: normal !important;
+}
+.el-upload-list__item {
+  padding-right: 20px !important;
+}
+.el-message-box__content {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 9px;
+}
+.el-button--primary.is-plain{
+  color: #6187EF;
+  &:hover{
+    color: #fff;
+    background-color: #6187EF !important;
+  }
+  &:focus{
+    color: #fff;
+    background-color: #6187EF !important;
+  }
+}
+.el-button--primary{
+  border-color: transparent !important;
+}
+.el-dialog{
+  .school-list-box{
+    .el-checkbox__label{
+      width: 80px !important;
+    }
+  }
+}
+
+
+.el-button--text:focus, .el-button--text:hover {
+  color: #1966FF !important;
+}
+.el-button--primary.is-link:focus, .el-button--primary.is-link:hover {
+  color: #1966FF !important;
+}
+
+.btns {
+  .el-button--primary:focus, .el-button--primary:hover {
+    color: #fff !important;
+    background-color: #1966FF !important;
+  }
+  .plainPrimary {
+    border: 1px solid #1966FF;
+    color: #1966FF;
+  }
+}
+
+.dialogContainer {
+  --el-dialog-title-font-size: var(--el-font-size-medium) !important;
+  color: rgba(0,0,0,0.85) !important;
+  border-radius: 4px !important;
+  .el-dialog__header {
+    padding-bottom: 15px;
+    margin-left: 16px;
+    padding-left: 0;
+    border-bottom: 1px solid #E3E3E3;
+  }
+  .el-dialog__body {
+    padding: 20px 25px;
+  }
+  .el-dialog__footer {
+    border-top: none;
+  }
+}
+
+.drawerContainer {
+  .el-drawer__header {
+    margin-bottom: 0;
+    padding: 14px 20px;
+    border-bottom: 1px solid #EBEEF5;
+    .el-drawer__title {
+      font-size: 16px;
+      font-family: PingFang SC, PingFang SC;
+      font-weight: 600;
+      color: #333333;
+      line-height: 19px;
+    }
+    .submitBtn {
+      background: #1966FF;
+      border-radius: 4px 4px 4px 4px;
+      opacity: 1;
+      font-size: 14px;
+      font-family: PingFang SC, PingFang SC;
+      font-weight: 400;
+      color: #FFFFFF;
+      line-height: 16px;
+      margin-right: 20px;
+    }
+    .endBtn {
+      background: #F15959;
+      border-radius: 4px 4px 4px 4px;
+      opacity: 1;
+      font-size: 14px;
+      font-family: PingFang SC, PingFang SC;
+      font-weight: 400;
+      color: #FFFFFF;
+      line-height: 16px;
+      margin-right: 20px;
+    }
+  }
+}
+.drawerDetailContainer {
+  .el-drawer__header {
+    margin-bottom: 0;
+    padding: 14px 20px 14px 0;
+    border-bottom: 1px solid #EBEEF5;
+    .el-drawer__title {
+      font-size: 16px;
+      font-family: PingFang SC, PingFang SC;
+      font-weight: 600;
+      color: #333333;
+      line-height: 19px;
+      .titleLabel {
+        display: inline-block;
+        padding: 7px 20px;
+        border-radius: 0px 17px 17px 0px;
+        opacity: 1;
+        font-size: 14px;
+        font-family: PingFang SC, PingFang SC;
+        font-weight: 600;
+        line-height: 16px;
+      }
+      .reading {
+        background: #EAF1FF;
+        color: #2C65D6;
+      }
+      .graduate {
+        background: #FFEFDB;
+        color: #DB792A;
+      }
+      .loss {
+        background: #FFEFEF;
+        color: #D45547;
+      }
+      .taskTitleLabel {
+        display: inline-block;
+        padding: 7px 20px;
+        background-color: #FFEFEF;
+        border-radius: 0px 17px 17px 0px;
+        opacity: 1;
+        font-size: 14px;
+        font-family: PingFang SC, PingFang SC;
+        font-weight: 600;
+        color: #D45547;
+        line-height: 16px;
+      }
+    }
+  }
+}
+
+:root {
+  --el-color-primary: #1966FF;
+}
