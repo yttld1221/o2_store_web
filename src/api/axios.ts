@@ -26,8 +26,8 @@ const http: AxiosInstance = axios.create({
 // 请求拦截 -->在请求发送之前做一些事情
 http.interceptors.request.use(
   config => {
-    config.headers['Authorization'] =
-      window.localStorage.getItem('bjAdminToken') || '';
+    config.headers['token'] =
+      window.localStorage.getItem('token') || '';
     return config;
   },
   error => {
@@ -38,13 +38,16 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   response => {
     const data: any = response.data;
+    console.log(data)
+
     // 其他
-    let code = data.errorCode;
-    if (code == 200) {
-      return data.object;
-    } else if (code == 511) {
+    let code = data.code;
+    if (code == 0) {
+      return data;
+    } else if (code == 410) {
       //登录过期 多端登录
       Router.push('/login');
+      localStorage.removeItem('token')
       ElMessage({
         message: data.msg,
         type: 'error',

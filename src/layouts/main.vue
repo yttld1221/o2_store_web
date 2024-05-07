@@ -5,7 +5,8 @@
     <el-container>
       <div class="side-bar">
         <div class="logo-box">
-          <img src="@/assets/img/logo.png" />
+          <img src="@/assets/img/login-logo.png" />
+          校园氧气仓库
         </div>
         <div class="menu-box">
           <el-menu :default-active="active" :router="true">
@@ -62,10 +63,7 @@
                   src="@/assets/img/icon-user.png"
                   alt=""
                 />
-                <span>{{ userInfo.staffName }}</span>
-                <span style="color: #999999; margin-left: 4px"
-                  >({{ userInfo.staffCode }})</span
-                >
+                <span>{{ userInfo.name }}</span>
                 <div @click="toExit" class="exit-box flex-align">
                   <img
                     style="margin-right: 6px; width: 16px; height: 16px"
@@ -98,25 +96,25 @@
 </template>
 
 <script>
-import svgIcon from '@/icons/component/svgIcon.vue';
+import svgIcon from "@/icons/component/svgIcon.vue";
 import {
   computed,
   reactive,
   toRefs,
   ref,
   onMounted,
-  getCurrentInstance
-} from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { ElMessageBox } from 'element-plus';
-import { getIncludeList } from '@/utils/utils';
-import './Interface/main';
-import Crumbs from '@/layouts/components/crumbs.vue';
+  getCurrentInstance,
+} from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { ElMessageBox } from "element-plus";
+import { getIncludeList } from "@/utils/utils";
+import "./Interface/main";
+import Crumbs from "@/layouts/components/crumbs.vue";
 export default {
-  name: 'Main',
+  name: "Main",
   components: {
     Crumbs,
-    svgIcon
+    svgIcon,
   },
   setup() {
     const _this = getCurrentInstance();
@@ -126,88 +124,69 @@ export default {
       route: useRoute(),
       menuList: [], //菜单列表
       includeList: getIncludeList(),
-      userInfo: JSON.parse(localStorage.getItem('bjAdminUser')) || {},
-      pageTitle: '',
-      active: ''
+      userInfo: JSON.parse(localStorage.getItem("userInfo")) || {},
+      pageTitle: "",
+      active: "",
     });
     const key = computed(() => {
       return data.route.path + Math.random();
     });
     const sideList = computed(() => {
-      let name = '/' + data.route.path.split('/')[1];
-      let arr = data.route.path.split('/');
-      if (arr[arr.length - 1].includes('Detail')) {
+      let name = "/" + data.route.path.split("/")[1];
+      let arr = data.route.path.split("/");
+      if (arr[arr.length - 1].includes("Detail")) {
         arr.splice(arr.length - 1, 1);
       }
       if ([].includes(arr[arr.length - 1])) {
         arr.splice(arr.length - 1, 1);
-        arr.push('list');
+        arr.push("list");
       }
-      if (['classInfo'].includes(arr[arr.length - 1])) {
+      if (["classInfo"].includes(arr[arr.length - 1])) {
         arr.splice(arr.length - 1, 1);
-        arr.push('index');
+        arr.push("index");
       }
       //console.log(arr);
-      data.active = arr.join('/');
+      data.active = arr.join("/");
       //console.log(data.active);
       return data.menuList;
     });
     onMounted(() => {
-      if (data.route.query.Authorization) {
-        API.system.staffInfoid({}).then(res => {
-          console.log(res);
-          const userInfo = {
-            roleCode: res.role.roleCode,
-            staffName: res.staffName,
-            staffCode: res.staffCode,
-            dataType: res.role?.dataType,
-            mobile: res.mobile,
-            id: res.id
-          };
-          data.userInfo = userInfo;
-          data.menuList = res.role.menuTree;
-          localStorage.setItem('bjAdminUser', JSON.stringify(userInfo));
-          localStorage.setItem(
-            'bjAdminMenu',
-            JSON.stringify(res.role.menuTree)
-          );
-          localStorage.setItem(
-            'bjAdminBtns',
-            JSON.stringify(res.role.buttonPathList)
-          );
-          let path = '';
-          let pathArr = res.role.menuTree;
-          if (pathArr.length) {
-            if (
-              pathArr[0].childNode &&
-              pathArr[0].childNode.length &&
-              pathArr[0].childNode[0].menuType == 1
-            ) {
-              path = pathArr[0].childNode[0].path;
-            } else {
-              path = pathArr[0].path;
-            }
-          } else {
-            path = '/';
-          }
-          data.router.push(path);
-        });
-      } else {
-        data.menuList = JSON.parse(localStorage.getItem('bjAdminMenu'));
-      }
+      data.menuList = [
+        {
+          label: "欢迎",
+          path: "/home",
+          childNode: [],
+          icon: "",
+        },
+        {
+          label: "朋友圈管理",
+          path: "/postManage/list",
+          childNode: [],
+          icon: "",
+        },
+        {
+          label: "小程序用户管理",
+          path: "/wechatUser/list",
+          childNode: [],
+          icon: "",
+        },
+      ];
     });
     function funGo(path) {
       data.router.push(path);
     }
     // 退出
     function toExit() {
-      ElMessageBox.confirm('确认退出系统？', '退出', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        closeOnClickModal: false
+      ElMessageBox.confirm("确认退出系统？", "退出", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        closeOnClickModal: false,
       })
         .then(() => {
-          data.router.push('/login');
+          API.login.logOut({}).then((res) => {
+            localStorage.removeItem("token");
+            data.router.push("/login");
+          });
         })
         .catch(() => {});
     }
@@ -217,9 +196,9 @@ export default {
       sideList,
       funGo,
       toExit,
-      ...toRefs(data)
+      ...toRefs(data),
     };
-  }
+  },
 };
 </script>
 
@@ -278,7 +257,7 @@ export default {
   .btn-user {
     width: 25px;
     height: 25px;
-    background: url('../assets/img/icon-user.png') 0 0 no-repeat;
+    background: url("../assets/img/icon-user.png") 0 0 no-repeat;
     background-size: cover;
     cursor: pointer;
   }
@@ -348,9 +327,12 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
     img {
-      width: 130px;
+      width: 28px;
       height: 28px;
+      margin-right: 8px;
     }
   }
   .menu-box {

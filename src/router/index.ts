@@ -13,23 +13,44 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/home',
         name: 'home',
-        component: () => import('/src/view/home/index.vue').catch(() => {}),
-        meta: { title: '首页' }
+        component: () => import('/src/view/home/home.vue').catch(() => { }),
+        meta: { title: '欢迎' }
       },
       {
-        path: '/teacherManage',
-        name: 'teacherManage',
-        redirect: '/teacherManage/list',
+        path: '/postManage',
+        name: 'postManage',
+        redirect: '/postManage/list',
         component: () =>
-          import('/src/view/teacherManage/teacherIndex.vue').catch(() => {}),
-        meta: { title: '教师管理' },
+          import('/src/view/postManage/postIndex.vue').catch(() => { }),
+        meta: { title: '朋友圈管理' },
         children: [
           {
-            path: '/teacherManage/list',
-            name: 'teacherManageList',
+            path: '/postManage/list',
+            name: 'postManageList',
             component: () =>
-              import('/src/view/teacherManage/teacherIndex.vue').catch(
-                () => {}
+              import('/src/view/postManage/postIndex.vue').catch(
+                () => { }
+              ),
+            meta: {
+              title: ''
+            }
+          }
+        ]
+      },
+      {
+        path: '/wechatUser',
+        name: 'wechatUser',
+        redirect: '/wechatUser/list',
+        component: () =>
+          import('/src/view/wechatUser/wechatUserIndex.vue').catch(() => { }),
+        meta: { title: '小程序用户管理' },
+        children: [
+          {
+            path: '/wechatUser/list',
+            name: 'wechatUserList',
+            component: () =>
+              import('/src/view/wechatUser/wechatUserIndex.vue').catch(
+                () => { }
               ),
             meta: {
               title: ''
@@ -40,14 +61,14 @@ const routes: Array<RouteRecordRaw> = [
     ]
   },
   // 系统管理
-  system,
-  // 学生管理
-  student,
+  // system,
+  // // 学生管理
+  // student,
   // **********404**********
   {
     path: '/:catchAll(.*)',
     name: '404',
-    component: () => import('/src/layouts/error.vue').catch(() => {}),
+    component: () => import('/src/layouts/error.vue').catch(() => { }),
     meta: { title: '404' }
   },
   {
@@ -63,6 +84,7 @@ const Router = createRouter({
 });
 Router.beforeEach(async (to: any, form: any, next: any) => {
   //console.log(to);
+  // next();
   let title = '';
   if (to.meta.title) {
     title = to.meta.title;
@@ -72,24 +94,19 @@ Router.beforeEach(async (to: any, form: any, next: any) => {
       title = to.matched[index - 1].meta.title;
     }
   }
-  document.title = title;
-
-  let { hash } = location;
-  if (hash.split("Authorization=") && hash.split("Authorization=")[1]) {
-    localStorage.setItem("bjAdminToken", hash.split("Authorization=")[1]);
-  }
+  document.title = title + ' - 校园氧气仓库';
+  const token = window.localStorage.getItem("token")
   if (to.path === "/login") {
-    next();
-  } else {
-    if (
-        !window.localStorage.getItem("bjAdminToken") ||
-        window.localStorage.getItem("bjAdminToken") === ""
-    ) {
-      next({ path: "/login" });
+    if (token) {
+      next('/');
     } else {
       next();
-      await store.dispatch("getDict");
-      await store.dispatch("getYearsDict");
+    }
+  } else {
+    if (token) {
+      next();
+    } else {
+      next({ path: "/login" });
     }
   }
 });

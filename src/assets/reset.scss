@@ -127,3 +127,9 @@ ol {
     color: #4d88ff !important;
   }
 }
+.el-button.is-disabled{
+  background: #a0cfff !important;
+}
+.el-button.is-disabled:hover:not(.is-link) {
+  background: #a0cfff !important;
+}

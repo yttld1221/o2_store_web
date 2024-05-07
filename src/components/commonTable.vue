@@ -20,6 +20,13 @@
               >
             </template>
           </el-table-column>
+          <!-- 选择栏 -->
+          <el-table-column
+            v-bind="col"
+            v-else-if="col.colType == 'selection' && !col.hidden"
+            type="selection"
+            width="55"
+          />
           <!-- 自定义栏 -->
           <el-table-column
             v-bind="col"
@@ -49,10 +56,7 @@
             v-else-if="col.colType == 'slot' && !col.hidden"
           ></slot>
           <!-- 通用栏 -->
-          <el-table-column
-            v-bind="col"
-            v-else-if="!col.hidden"
-          >
+          <el-table-column v-bind="col" v-else-if="!col.hidden">
             <template #header="{ column, $index }">
               <slot
                 :name="colHeaderSlotName(col)"
@@ -81,7 +85,7 @@
       v-model:page-size="pageParams.limit"
       :page-sizes="pageSizes"
       layout="total, prev, pager, next, sizes, jumper"
-      :total="pageParams.total"
+      :total="pageParams.count"
       :background="true"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
@@ -98,13 +102,13 @@
 </template>
 <script>
 export default {
-  name: 'commonTable'
+  name: "commonTable",
 };
 </script>
 <script setup>
-import { reactive, ref, onMounted, computed, watch } from 'vue';
-import pagination from './pagination.vue';
-import { ElLoading } from 'element-plus';
+import { reactive, ref, onMounted, computed, watch } from "vue";
+import pagination from "./pagination.vue";
+import { ElLoading } from "element-plus";
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
@@ -117,21 +121,28 @@ const props = defineProps({
     type: Function,
     default: () => {
       return () => {};
-    }
+    },
   },
   //查询条件参数（除分页参数）
   queryParams: {
     type: Object,
     default: () => {
       return {};
-    }
+    },
+  },
+  // 自定义属性
+  attrs: {
+    type: Object,
+    default: () => {
+      return {};
+    },
   },
   //数据查询是否展示loading
   loading: {
     type: Boolean,
     default: () => {
       return false;
-    }
+    },
   },
   //分页组件属性设置
   paginationConfig: {
@@ -139,35 +150,35 @@ const props = defineProps({
     required: true,
     default: () => {
       return {};
-    }
+    },
   },
   //是否展示分页
   isShowPaging: {
     type: Boolean,
-    default: true
+    default: true,
   },
   //是否立即执行接口请求表格数据
   immediateLoad: {
     type: Boolean,
     default: () => {
       return true;
-    }
-  }
+    },
+  },
 });
 // eslint-disable-next-line no-undef
 const emit = defineEmits([
-  'size-change',
-  'current-change',
-  'prev-click',
-  'next-click'
+  "size-change",
+  "current-change",
+  "prev-click",
+  "next-click",
 ]);
 const tableData = ref([]);
 //表格
 // 表头插槽命名
 let colHeaderSlotName = computed(() => {
-  return col => {
+  return (col) => {
     //多级表头
-    if (col.colType == 'slot') {
+    if (col.colType == "slot") {
       return `${col.slotName}`;
     } else {
       //自定义表头
@@ -177,7 +188,7 @@ let colHeaderSlotName = computed(() => {
 });
 // 单元格插槽命名
 let colCellSlotName = computed(() => {
-  return col => {
+  return (col) => {
     return `column|${col.slotName || col.prop}`;
   };
 });
@@ -187,7 +198,7 @@ let colCellSlotName = computed(() => {
  */
 const isShowButton = (row, rowIndex, btn) => {
   let { hidden } = btn;
-  if (typeof hidden === 'function') return !hidden(row, rowIndex, btn);
+  if (typeof hidden === "function") return !hidden(row, rowIndex, btn);
   return !hidden;
 };
 
@@ -195,33 +206,33 @@ const isShowButton = (row, rowIndex, btn) => {
 let ajaxPageParams = computed(() => {
   // let param = this.pageParams;
   let { offset, limit, page } = pageParams;
-  return { offset, limit, pageSize: limit, pageNum: page };
+  return { offset, limit, pagesize: limit, page: page };
 });
 
 //分页参数
 let pageParams = reactive({
-  total: 0,
+  count: 0,
   offset: 0,
-  limit: 20,
-  page: 1
+  limit: 10,
+  page: 1,
 });
 const pageSizes = reactive([10, 20, 50, 100]);
-const handleSizeChange = size => {
+const handleSizeChange = (size) => {
   pageParams.limit = size;
-  emit('size-change', size, pageParams);
+  emit("size-change", size, pageParams);
   ajaxGetTableDataByPage();
 };
-const handleCurrentChange = pages => {
+const handleCurrentChange = (pages) => {
   let { page, limit } = pageParams;
   pageParams.offset = parseInt(limit, 10) * (parseInt(page, 10) - 1);
-  emit('current-change', pages, pageParams);
+  emit("current-change", pages, pageParams);
   ajaxGetTableDataByPage();
 };
-const handlePrevClick = pages => {
-  emit('prev-click', pages, pageParams);
+const handlePrevClick = (pages) => {
+  emit("prev-click", pages, pageParams);
 };
-const handleNextClick = pages => {
-  emit('next-click', pages, pageParams);
+const handleNextClick = (pages) => {
+  emit("next-click", pages, pageParams);
 };
 /**
  * 调用table组件的方法
@@ -233,7 +244,7 @@ const invokeTableFn = (fnName, ...args) => {
   // 校验是否已渲染
   if (!tableRef) return;
   const fn = tableRef[fnName];
-  if (typeof fn === 'function') {
+  if (typeof fn === "function") {
     return fn.apply(tableRef, args);
   }
 };
@@ -249,12 +260,12 @@ const ajaxGetTableDataByPage = async () => {
   if (!loadingIns.value) {
     //填充loading展示默认值，兼容处理
     let loadIns = {
-      close() {}
+      close() {},
     };
     //需要展示loading
     if (props.loading) {
       loadIns = ElLoading.service({
-        target: table.value.$el
+        target: table.value.$el,
       });
     }
     loadingIns.value = loadIns;
@@ -263,36 +274,36 @@ const ajaxGetTableDataByPage = async () => {
   if (isInquire.value) {
     ajaxParams = {
       ...ajaxPageParams.value,
-      ...props.queryParams
+      ...props.queryParams,
     };
   } else {
     ajaxParams = {
-      ...ajaxPageParams.value
+      ...ajaxPageParams.value,
     };
   }
 
   //获取func入参
   let dataFun = props.ajaxGetData;
   //完成回调
-  let callFun = res => {
+  let callFun = (res) => {
     loadingIns.value.close(); //关闭loading
     loadingIns.value = null; //置空load示例
     if (!res) return;
     let data = res || {};
-    tableData.value = Array.isArray(data.records) ? data.records : []; //表数据
+    tableData.value = Array.isArray(data.data) ? data.data : []; //表数据
     console.log(tableData.value);
-    pageParams.total = data.total || 0; //数据长度
+    pageParams.count = data.count || 0; //数据长度
     if (tableData.value.length === 0) pageParams.page = 1; //无数据时，重定向第一页
   };
   //func判非空并执行
   let dataPromise = dataFun && dataFun(ajaxParams);
   //promise接收返回值
-  if (dataPromise && typeof dataPromise.then == 'function') {
+  if (dataPromise && typeof dataPromise.then == "function") {
     Promise.all([dataPromise])
-      .then(res => {
+      .then((res) => {
         callFun(res[0]);
       })
-      .catch(e => {
+      .catch((e) => {
         console.error(e);
         callFun();
       });
@@ -320,7 +331,7 @@ onMounted(() => {
 
 watch(
   () => props.propsTableData,
-  newVal => {
+  (newVal) => {
     if (newVal) {
       tableData.value = props.propsTableData;
     }
@@ -331,11 +342,11 @@ watch(
   () => props.queryParams,
   (newVal, oldValue) => {
     if (newVal) {
-      if (newVal.hasOwnProperty('pageNum')) {
-        pageParams.page = newVal.pageNum;
+      if (newVal.hasOwnProperty("page")) {
+        pageParams.page = newVal.page;
       }
-      if (newVal.hasOwnProperty('pageSize')) {
-        pageParams.limit = newVal.pageSize;
+      if (newVal.hasOwnProperty("pagesize")) {
+        pageParams.limit = newVal.pagesize;
       }
     }
   },
@@ -348,7 +359,7 @@ onActivated(() => {
 // eslint-disable-next-line no-undef
 defineExpose({
   invokeTableFn,
-  refreshTable
+  refreshTable,
 });
 </script>
 <style lang="scss" scoped>

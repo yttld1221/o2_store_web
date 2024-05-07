@@ -71,33 +71,11 @@ export default ({ mode }) => {
       host: '0.0.0.0',
       port: 8089,
       proxy: {
-        '/toptalents': {
-          // target: "http://172.21.33.12:8081", //梁本地
-          // target: "http://172.21.32.51:8081/toptalent", //张本地
-          target: 'http://10.30.5.101:31530', //测试
+        '/admin': {
+          target: 'https://api2.allinnb.com/admin', //测试
           // target: "http://10.10.21.180:8081/toptalent", //正式
           changeOrigin: true,
-          rewrite: path => path.replace(/^\/toptalents/, '')
-        },
-
-        '/kkFileView': {
-          target: 'http://10.30.5.97:8012', //文件服务器地址
-          ws: true, // 是否启用 websockets
-          changeOrigin: true, // 主机头的起源保持默认进行代理时，可以设置changeOrigin以true覆盖此行为。
-          secure: false,
-          rewrite: path => path.replace(/^\/kkFileView/, '')
-        },
-        '/fast-file': {
-          target: 'http://10.30.5.34', //文件服务器地址
-          ws: true, // 是否启用 websockets
-          changeOrigin: true, // 主机头的起源保持默认进行代理时，可以设置changeOrigin以true覆盖此行为。
-          secure: false
-        },
-        '/pdf-preview': {
-          target: 'http://10.30.5.29', //文件服务器地址
-          ws: true, // 是否启用 websockets
-          changeOrigin: true, // 主机头的起源保持默认进行代理时，可以设置changeOrigin以true覆盖此行为。
-          secure: false
+          rewrite: path => path.replace(/^\/admin/, '')
         }
       }
     },

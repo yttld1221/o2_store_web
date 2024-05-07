@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
+    "build": "vite build --mode development",
     "build:prod": "vite build --mode production",
     "build:sit": "vite build --mode sit"
   },

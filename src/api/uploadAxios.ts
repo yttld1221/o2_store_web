@@ -27,18 +27,18 @@ http.interceptors.response.use(
     // 其他
     if (data.status === 200) {
       return data.data;
-    } else if ([403,401].includes(data.code)) { //登录过期，多端登录
+    } else if ([403, 401].includes(data.code)) { //登录过期，多端登录
       Router.push({ name: "login" });
-      localStorage.removeItem('bjAdminToken')
+      localStorage.removeItem('token')
       return Promise.reject(response.data);
-    }else {
+    } else {
       ElMessage({
         message: data.message,
         type: "error",
         duration: 2000
       })
       return Promise.reject(response.data);
-    } 
+    }
   },
   (error) => {
     const data: any = error.response.data
