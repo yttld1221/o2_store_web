@@ -44,6 +44,7 @@
         :ajaxGetData="getTableData"
         :paginationConfig="paginationConfig"
         @selection-change="handleSelectionChange"
+        :row-key="getRowKeys"
       >
         <template v-slot:column|is_hot="scope">
           {{ selectText[scope.row.is_hot] }}
@@ -94,7 +95,7 @@
     <preview-image ref="previewRef" />
   </div>
 </template>
-<script lang="ts" setup name="teacherIndex">
+<script lang="ts" setup name="postIndex">
 import {
   onMounted,
   reactive,
@@ -189,6 +190,10 @@ const changeModel = (model, value, key) => {
 };
 
 const rowsDynamicFormRef = ref();
+
+const getRowKeys = (row) => {
+  return row.id;
+};
 //重置表单
 const resetForm = (tag) => {
   if (tag) rowsDynamicFormRef?.value.invokeFormFn("resetFields");
@@ -220,6 +225,7 @@ const tableHeader = reactive([
     label: "",
     colType: "selection",
     fixed: "left",
+    "reserve-selection": true,
   },
   {
     label: "ID",
@@ -319,6 +325,8 @@ const confirmSubmit = async () => {
   console.log(res);
   if (res.code == 0) {
     handleClose();
+    multipleSelection.value = [];
+    tableRef.value.clearChoose();
     ElMessage.success("操作成功");
     tableRef.value.refreshTable(false);
   }

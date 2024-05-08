@@ -2,7 +2,7 @@
   <div class="login">
     <div class="login-title">
       <img class="logo" src="@/assets/img/login-logo.png" alt="" />
-      校园氧气仓库
+      校园氧气仓库-v2
     </div>
     <div class="login-desc">校园氧气仓库后台管理系统</div>
     <div class="form-box">
@@ -102,6 +102,8 @@ const goIndex = () => {
         if (autoLogin.value) {
           params = { ...params, autoLogin: autoLogin.value };
           localStorage.setItem("loginData", JSON.stringify(params));
+        } else {
+          localStorage.removeItem("loginData");
         }
         getUserInfo();
       });

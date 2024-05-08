@@ -73,7 +73,6 @@ export default ({ mode }) => {
       proxy: {
         '/admin': {
           target: 'https://api2.allinnb.com/admin', //测试
-          // target: "http://10.10.21.180:8081/toptalent", //正式
           changeOrigin: true,
           rewrite: path => path.replace(/^\/admin/, '')
         }

@@ -353,6 +353,10 @@ watch(
   { deep: true }
 );
 
+const clearChoose = () => {
+  table.value.clearSelection();
+};
+
 onActivated(() => {
   doLayout();
 });
@@ -360,6 +364,7 @@ onActivated(() => {
 defineExpose({
   invokeTableFn,
   refreshTable,
+  clearChoose,
 });
 </script>
 <style lang="scss" scoped>

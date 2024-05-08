@@ -71,4 +71,7 @@ declare module 'vue' {
     Steps: typeof import('./src/components/steps.vue')['default']
     TreeChoose: typeof import('./src/components/treeChoose.vue')['default']
   }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
+  }
 }

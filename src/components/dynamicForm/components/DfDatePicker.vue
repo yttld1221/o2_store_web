@@ -1,5 +1,5 @@
 <template>
-  <el-date-picker v-model="val" v-bind="attrs" v-on="events"></el-date-picker>
+  <el-date-picker style='width:100%' v-model="val" v-bind="attrs" v-on="events"></el-date-picker>
 </template>
 
 <script lang="ts">

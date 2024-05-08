@@ -37,6 +37,7 @@
         </el-form-item>
       </el-form>
       <el-table
+        v-loading="loading"
         ref="table"
         :data="tableData"
         style="width: 100%"
@@ -103,12 +104,12 @@
 import { onMounted, getCurrentInstance, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
-import { ElLoading } from "element-plus";
 
 const router = useRouter();
 const _this: any = getCurrentInstance();
 const API: any = _this.proxy.$API;
 const message: any = _this.proxy.$Message;
+const loading = ref(false);
 const emit = defineEmits(["changeList"]);
 const table = ref();
 const tableData = ref([]);
@@ -159,11 +160,8 @@ const changeOn = (type, id) => {
     })
     .catch(() => {});
 };
-const loadingIns = ref();
 const getList = () => {
-  loadingIns.value = ElLoading.service({
-    target: table.value.$el,
-  });
+  loading.value = true;
   const params = {
     ...pageInfo.value,
     moments_id: commentId.value,
@@ -171,8 +169,7 @@ const getList = () => {
   };
   API.post.getCommentList(params).then((res) => {
     console.log(res);
-    loadingIns.value.close(); //关闭loading
-    loadingIns.value = null; //置空load示例
+    loading.value = false;
     tableData.value = res.data;
     total.value = res.count;
   });
@@ -180,6 +177,7 @@ const getList = () => {
 
 let dialogVisible = ref(false);
 const openDialog = (id) => {
+  console.log(id);
   dialogVisible.value = true;
   commentId.value = id;
   getList();

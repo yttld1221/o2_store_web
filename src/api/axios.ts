@@ -16,7 +16,7 @@ if ((MODE === 'sit' || MODE === 'development') && DEV) {
 let tag = true;
 // 创建实例
 const http: AxiosInstance = axios.create({
-  baseURL: baseURLS,
+  baseURL: baseURL,
   timeout: 360000
 });
 // 设置post请求头
@@ -38,7 +38,6 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   response => {
     const data: any = response.data;
-    console.log(data)
 
     // 其他
     let code = data.code;
