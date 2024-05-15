@@ -17,20 +17,12 @@ const wechat = {
       params: data
     });
   },
-  // 用户-用户登入
-  login(data: any): AxiosPromise<any> {
+  //用户-导出小程序用户
+  getUserListXlsx(data: any): AxiosPromise<any> {
     return http({
-      url: '/admin/login',
-      method: 'POST',
-      data
-    });
-  },
-   // 用户-用户登入
-   logOut(data: any): AxiosPromise<any> {
-    return http({
-      url: '/admin/logOut',
-      method: 'POST',
-      data
+      url: '/wx/getUserListXlsx',
+      method: 'GET',
+      params: data
     });
   },
 };

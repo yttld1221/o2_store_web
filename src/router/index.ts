@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import system from './modules/system';
-import student from './modules/student';
+import actvity from './modules/actvity';
 import Main from '/src/layouts/main.vue';
 import store from "../store/index";
 const routes: Array<RouteRecordRaw> = [
@@ -62,8 +62,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   // 系统管理
   // system,
-  // // 学生管理
-  // student,
+  // //活动管理
+  actvity,
   // **********404**********
   {
     path: '/:catchAll(.*)',

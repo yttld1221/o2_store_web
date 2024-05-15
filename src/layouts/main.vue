@@ -137,7 +137,7 @@ export default {
       if (arr[arr.length - 1].includes("Detail")) {
         arr.splice(arr.length - 1, 1);
       }
-      if ([].includes(arr[arr.length - 1])) {
+      if (["detail"].includes(arr[arr.length - 1])) {
         arr.splice(arr.length - 1, 1);
         arr.push("list");
       }
@@ -156,19 +156,41 @@ export default {
           label: "欢迎",
           path: "/home",
           childNode: [],
-          icon: "",
+          icon: "hy",
         },
         {
           label: "朋友圈管理",
           path: "/postManage/list",
           childNode: [],
-          icon: "",
+          icon: "pyq",
         },
         {
           label: "小程序用户管理",
           path: "/wechatUser/list",
           childNode: [],
-          icon: "",
+          icon: "xcxyh",
+        },
+        {
+          label: "活动管理",
+          path: "/activityManage",
+          childNode: [
+            {
+              label: "活动分类管理",
+              path: "/activityManage/activityType/list",
+              childNode: [],
+            },
+            {
+              label: "活动管理",
+              path: "/activityManage/activityList/list",
+              childNode: [],
+            },
+            {
+              label: "订单管理",
+              path: "/activityManage/orderManage/list",
+              childNode: [],
+            },
+          ],
+          icon: "xcxyh",
         },
       ];
     });
@@ -488,7 +510,7 @@ export default {
 .svg-icon {
   margin-top: -4px;
 }
-.icon-txt {
-  margin-left: 8px;
-}
+// .icon-txt {
+//   margin-left: 8px;
+// }
 </style>

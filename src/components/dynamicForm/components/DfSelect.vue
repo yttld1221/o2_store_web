@@ -7,21 +7,37 @@
     v-on="events"
     v-scrolloutclose="{
       el: scrollEl, //scroll滚动区域
-      handler: onCloseDropDown //触发事件
+      handler: onCloseDropDown, //触发事件
     }"
     @change="onChange"
     :title="labelVal"
     :loading="!!lastRequestSymbol"
   >
-    <template v-for="(item, index) in optionList">
-      <el-option
-        v-bind="item"
-        :key="index"
-        :value="item[valueKey]"
-        :label="item[labelKey]"
-        v-if="item.hasOwnProperty('hidden') ? !isHidden(item) : true"
+    <template v-if="config.isGroup">
+      <el-option-group
+        v-for="group in optionList"
+        :key="group.label"
+        :label="group.label"
       >
-      </el-option>
+        <el-option
+          v-for="item in group.options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-option-group>
+    </template>
+    <template v-else>
+      <template v-for="(item, index) in optionList">
+        <el-option
+          v-bind="item"
+          :key="index"
+          :value="item[valueKey]"
+          :label="item[labelKey]"
+          v-if="item.hasOwnProperty('hidden') ? !isHidden(item) : true"
+        >
+        </el-option>
+      </template>
     </template>
   </el-select>
 </template>
@@ -35,16 +51,16 @@ import {
   nextTick,
   defineComponent,
   computed,
-  inject
-} from 'vue';
-import Utils from './utils';
-import { scrolloutclose } from '../directives/scrolloutclose';
-import $event from './events';
+  inject,
+} from "vue";
+import Utils from "./utils";
+import { scrolloutclose } from "../directives/scrolloutclose";
+import $event from "./events";
 
 export default defineComponent({
-  name: 'DfSelect',
+  name: "DfSelect",
   directives: {
-    [scrolloutclose.name]: scrolloutclose.option
+    [scrolloutclose.name]: scrolloutclose.option,
   },
   props: {
     /**
@@ -56,13 +72,13 @@ export default defineComponent({
      */
     config: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   setup(props, context) {
     const { proxy } = getCurrentInstance();
     let uuid = ref(Utils.generateUUID());
-    let CDynamicForm: any = inject('CDynamicForm');
+    let CDynamicForm: any = inject("CDynamicForm");
     // 值
     let val = ref(props.value);
     let remoteOptionList = ref([]); // 远程选项列表
@@ -72,13 +88,13 @@ export default defineComponent({
      * 标签key
      */
     let labelKey = computed(() => {
-      return props.config.labelKey || 'label';
+      return props.config.labelKey || "label";
     });
     /**
      * 值key
      */
     let valueKey = computed(() => {
-      return props.config.valueKey || 'value';
+      return props.config.valueKey || "value";
     });
     /**
      * 选项列表数据
@@ -93,7 +109,7 @@ export default defineComponent({
      */
     let isAjax = computed(() => {
       let { ajax } = props.config;
-      return ajax && typeof ajax === 'function';
+      return ajax && typeof ajax === "function";
     });
     /**
      * 属性配置
@@ -106,10 +122,10 @@ export default defineComponent({
     });
 
     let popperClass = computed(() => {
-      return 'dropdown-' + props.config.prop + '-' + uuid.value;
+      return "dropdown-" + props.config.prop + "-" + uuid.value;
     });
     let scrollEl = computed(() => {
-      return '.' + popperClass.value + ' .el-select-dropdown__wrap';
+      return "." + popperClass.value + " .el-select-dropdown__wrap";
     });
 
     //展示下拉框本文tip
@@ -117,17 +133,17 @@ export default defineComponent({
       let { model } = CDynamicForm;
       let { labelProp } = props.config;
       //无值不展示
-      if (val.value !== false && !val.value) return '';
+      if (val.value !== false && !val.value) return "";
       if (labelProp) {
         return model[labelProp];
       }
       let res = optionList.value.find(
-        item => item[valueKey.value] === val.value
+        (item) => item[valueKey.value] === val.value
       );
       if (res) {
         return res[labelKey.value];
       } else {
-        return '';
+        return "";
       }
     });
 
@@ -141,10 +157,10 @@ export default defineComponent({
      * - undefined
      * @param {*} value 值
      */
-    const isEmptyValue = value => {
+    const isEmptyValue = (value) => {
       if (value === undefined || value === null) return true;
       if (Array.isArray(value) && !value.length) return true;
-      if (value === '') return true;
+      if (value === "") return true;
       return false;
     };
 
@@ -157,7 +173,7 @@ export default defineComponent({
         selectRef.blur();
     };
 
-    const selectBlur = e => {
+    const selectBlur = (e) => {
       if (props.config?.attrs?.record) {
         if (e.target?.value) {
           val.value = e.target.value;
@@ -176,7 +192,7 @@ export default defineComponent({
         return (remoteOptionList.value = []);
       let symbol = Symbol(props.config.prop);
       try {
-        context.emit('ajax-start', symbol);
+        context.emit("ajax-start", symbol);
         lastRequestSymbol.value = symbol;
         let res = await ajax(CDynamicForm.model, val.value, props.config.prop);
         res = Array.isArray(res) ? res : [];
@@ -186,7 +202,7 @@ export default defineComponent({
         remoteOptionList.value = [];
         throw e;
       } finally {
-        context.emit('ajax-end', symbol);
+        context.emit("ajax-end", symbol);
         lastRequestSymbol.value = null;
       }
     };
@@ -196,7 +212,7 @@ export default defineComponent({
      */
     const init = () => {
       // 校验是否有表单元素包裹
-      if (!CDynamicForm) throw new Error('缺少CDynamicForm组件包裹');
+      if (!CDynamicForm) throw new Error("缺少CDynamicForm组件包裹");
       let { parentProp } = props.config;
       if (parentProp) {
         // 上级联动
@@ -204,13 +220,13 @@ export default defineComponent({
           () => CDynamicForm.model[`${parentProp}`],
           (newVal, oldVal) => {
             nextTick(() => {
-              val.value = Array.isArray(val.value) ? [] : '';
+              val.value = Array.isArray(val.value) ? [] : "";
             });
             ajaxOptionList();
           }
         );
         // 解绑
-        $event.$on('hook:destroyed', () => {
+        $event.$on("hook:destroyed", () => {
           unwatch();
         });
         CDynamicForm.model[parentProp] && ajaxOptionList();
@@ -220,7 +236,7 @@ export default defineComponent({
     };
 
     // 监听下拉框变化 fix 仅针对用户手动触发ui组件改变选项时，触发label值改变
-    const onChange = newVal => {
+    const onChange = (newVal) => {
       let { labelProp } = props.config;
       // 不带labelProp，不做处理
       if (!labelProp) return;
@@ -228,17 +244,17 @@ export default defineComponent({
       //多选下拉
       if (Array.isArray(newVal)) {
         res = [];
-        newVal.forEach(val => {
-          let v = optionList.value.find(item => item[valueKey.value] === val);
+        newVal.forEach((val) => {
+          let v = optionList.value.find((item) => item[valueKey.value] === val);
           v && res.push(v[labelKey.value]);
         });
-        context.emit('change-label', labelProp, res);
+        context.emit("change-label", labelProp, res);
       } else {
-        res = optionList.value.find(item => item[valueKey.value] === newVal);
+        res = optionList.value.find((item) => item[valueKey.value] === newVal);
         context.emit(
-          'change-label',
+          "change-label",
           labelProp,
-          res !== undefined ? res[labelKey.value] : ''
+          res !== undefined ? res[labelKey.value] : ""
         );
       }
     };
@@ -246,20 +262,20 @@ export default defineComponent({
      * 是否隐藏选项
      * @param {*} item 选项
      */
-    const isHidden = item => {
-      if (typeof item.hidden === 'function')
+    const isHidden = (item) => {
+      if (typeof item.hidden === "function")
         return item.hidden.call(null, optionList.value);
       return item.hidden;
     };
 
     // 监听val变化，只对labelProp为空值的情况做清空处理及值变化向上传递
     watch(val, (newVal, oldVal) => {
-      context.emit('change-value', val.value);
+      context.emit("change-value", val.value);
       if (newVal) {
-        context.emit('change-label', props.config.prop, val.value);
+        context.emit("change-label", props.config.prop, val.value);
       } else {
         props.config.labelProp &&
-          context.emit('change-label', props.config.labelProp, val.value);
+          context.emit("change-label", props.config.labelProp, val.value);
       }
     });
 
@@ -295,9 +311,9 @@ export default defineComponent({
       isAjax,
       attrs,
       events,
-      isEmptyValue
+      isEmptyValue,
     };
-  }
+  },
 });
 </script>
 

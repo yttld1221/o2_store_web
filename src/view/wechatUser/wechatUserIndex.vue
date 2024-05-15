@@ -293,8 +293,16 @@ const tableHeader = reactive([
     prop: "sex",
   },
   {
+    label: "出生年月",
+    prop: "birthday",
+  },
+  {
     label: "所在学校",
     prop: "school_name",
+  },
+  {
+    label: "专业",
+    prop: "specialty",
   },
   {
     label: "账户余额",
@@ -369,6 +377,7 @@ const tableHeader = reactive([
   },
 ]);
 
+const exportParam = ref({});
 const getTableData = (param) => {
   let arr = ["grad_date", "logon_time", "created_at", "buy_vip_at"];
   arr.forEach((el) => {
@@ -376,36 +385,23 @@ const getTableData = (param) => {
       param[el] = param[el].join(",");
     }
   });
+  exportParam.value = param;
   return API.wechat.getUserList(param).then((res) => res);
 };
 
-const exportFile = () => {};
+const exportFile = () => {
+  API.wechat.getUserListXlsx(exportParam.value).then((res) => {
+    console.log(res);
+    window.open("https://api2.allinnb.com" + res.data.uri, "_blank");
+  });
+};
 
 const paginationConfig = reactive({});
 
 const handleClose = () => {
   dialogVisible.value = false;
 };
-const confirmSubmit = async () => {
-  const arr = multipleSelection.value.map((el) => el.id);
-  let params = {
-    moments_ids: arr.join(","),
-  };
-  let res = "";
-  if (dialogTitle.value == "上架下架") {
-    params["is_on"] = isChoose.value;
-    res = await API.post.setMomentsUpDown(params);
-  } else {
-    params["is_hot"] = isChoose.value;
-    res = await API.post.setMomentsHot(params);
-  }
-  console.log(res);
-  if (res.code == 0) {
-    handleClose();
-    ElMessage.success("操作成功");
-    tableRef.value.refreshTable(false);
-  }
-};
+const confirmSubmit = async () => {};
 
 const getSchoolSel = () => {
   API.wechat.getAllSchool({ status: 1 }).then((res) => {
