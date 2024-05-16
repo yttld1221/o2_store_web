@@ -62,6 +62,7 @@ declare module 'vue' {
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTimePicker: typeof import('element-plus/es')['ElTimePicker']
     ElTimeSelect: typeof import('element-plus/es')['ElTimeSelect']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     ImportUpload: typeof import('./src/components/importUpload.vue')['default']
     LineRadius: typeof import('./src/components/lineRadius.vue')['default']
     Pagination: typeof import('./src/components/pagination.vue')['default']
@@ -71,6 +72,7 @@ declare module 'vue' {
     RowsDynamicForm: typeof import('./src/components/dynamicForm/rowsDynamicForm.vue')['default']
     Steps: typeof import('./src/components/steps.vue')['default']
     TreeChoose: typeof import('./src/components/treeChoose.vue')['default']
+    UoloadFile: typeof import('./src/components/uoloadFile.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

@@ -51,7 +51,7 @@
           {{ selectText[scope.row.is_on] }}
         </template>
         <template v-slot:column|buy_level="scope">
-          {{ levelText[scope.row.is_on] }}
+          {{ levelText[scope.row.buy_level] }}
         </template>
         <template v-slot:column|img_url="scope">
           <el-image
@@ -67,7 +67,9 @@
           />
         </template>
         <template v-slot:column|fixbtn="scope">
-          <el-button type="primary" link>编辑</el-button>
+          <el-button type="primary" link @click="editForm(scope.row.id)"
+            >编辑</el-button
+          >
           <el-button type="primary" link>查看</el-button>
           <el-button
             @click="handleClick(scope.row, 'on', 1)"
@@ -127,6 +129,7 @@
         </span>
       </template>
     </el-dialog>
+    <activityListDialog @resetTable="resetForm" ref="dialogDetail" />
   </div>
 </template>
 <script lang="ts" setup name="activityListIndex">
@@ -145,6 +148,7 @@ import { useStore } from "vuex";
 import commonTable from "@/components/commonTable.vue";
 import queryHeader from "@/components/queryHeader.vue";
 import lineRadius from "@/components/lineRadius.vue";
+import activityListDialog from "./components/activityListDialog.vue";
 import rowsDynamicForm from "@/components/dynamicForm/rowsDynamicForm.vue";
 const router = useRouter();
 const route = useRoute();
@@ -328,6 +332,10 @@ const tableHeader = reactive([
     width: "150",
   },
   {
+    label: "活动描述",
+    prop: "description",
+  },
+  {
     label: "封面配图",
     prop: "img_url",
     colType: "column",
@@ -443,7 +451,7 @@ const handleClick = (row, key, val) => {
     .then(async () => {
       let res = "";
       let param = {
-        task_ids: row.id,
+        task_ids: row.id + "",
       };
       if (key == "on") {
         param["is_on"] = val;
@@ -470,12 +478,14 @@ const getSel = () => {
     formItems.value[3].options = res.data.map((el) => {
       return {
         label: el.title,
-        options: el.children.map((item) => {
-          return {
-            label: item.title,
-            value: item.id,
-          };
-        }),
+        options: !el.children
+          ? []
+          : el.children.map((item) => {
+              return {
+                label: item.title,
+                value: item.id,
+              };
+            }),
       };
     });
     console.log(formItems.value[3].options);
@@ -491,11 +501,17 @@ const getSel = () => {
       });
     });
 };
+const dialogDetail = ref();
+
+const editForm = (id) => {
+  dialogDetail.value.handleOpen("编辑", id);
+};
 
 const addActivity = () => {
-  router.push({
-    name: "activityListDetail",
-  });
+  // router.push({
+  //   name: "activityListDetail",
+  // });
+  dialogDetail.value.handleOpen("新增");
 };
 onMounted(() => {
   getSel();

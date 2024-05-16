@@ -1,5 +1,5 @@
 <template>
-  <div class="post-manage">
+  <div class="activity-type">
     <div class="queryModule">
       <queryHeader title="活动分类管理">
         <template #queryBtns>
@@ -22,7 +22,7 @@
     <div class="listModule">
       <div class="btnsContainer">
         <div class="btns left">
-          <el-button type="primary">新增</el-button>
+          <el-button type="primary" @click="addType()">新增</el-button>
         </div>
       </div>
       <el-table :data="tableData" row-key="id" v-loading="loading">
@@ -58,7 +58,9 @@
         >
         <el-table-column label="操作" width="100">
           <template #default="scope">
-            <el-button type="primary" link>编辑</el-button>
+            <el-button type="primary" link @click="editType(scope.row)"
+              >编辑</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -71,12 +73,71 @@
       width="400px"
       class="dialogContainer"
     >
-      <div class="dialog-box flex-align">
-        <span>是否{{ dialogTitle == "热门切换" ? "热门" : "上架" }}</span>
-        <el-radio-group v-model="isChoose">
-          <el-radio value="1" size="large">是</el-radio>
-          <el-radio value="2" size="large">否</el-radio>
-        </el-radio-group>
+      <div class="dialog-box">
+        <el-form
+          :rules="rules"
+          ref="formRef"
+          :model="ruleForm"
+          label-width="95px"
+        >
+          <el-form-item prop="pid" label="父级分类">
+            <el-select
+              @change="changePid"
+              clearable
+              v-model="ruleForm.pid"
+              placeholder="不填默认顶级分类"
+            >
+              <el-option
+                v-for="(item, index) in typeSel"
+                :key="index"
+                :label="item.title"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="名称" prop="title">
+            <el-input
+              v-model.trim="ruleForm.title"
+              placeholder="请输入"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="图片" prop="img_url" v-if="!ruleForm.pid">
+            <el-upload
+              class="avatar-uploader"
+              action="/"
+              :limit="1"
+              :multiple="false"
+              :http-request="uploadFile"
+              :show-file-list="false"
+              :before-upload="beforeAvatarUpload"
+            >
+              <img
+                v-if="ruleForm.img_url"
+                :src="ruleForm.img_url"
+                class="avatar"
+              />
+              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="是否隐藏" prop="is_hide">
+            <el-radio-group v-model="ruleForm.is_hide">
+              <el-radio :value="2">显示</el-radio>
+              <el-radio :value="1">隐藏</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="排序" prop="sort">
+            <el-input
+              v-model.trim="ruleForm.sort"
+              placeholder="请输入"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="是否开启" prop="status">
+            <el-select v-model="ruleForm.status" placeholder="请选择">
+              <el-option label="启用" :value="1" />
+              <el-option label="禁用" :value="2" />
+            </el-select>
+          </el-form-item>
+        </el-form>
       </div>
       <template #footer>
         <span class="dialogFooter">
@@ -117,6 +178,22 @@ const pageSizes = reactive([10, 20, 50, 100]);
 const dialogTitle = ref("");
 const dialogVisible = ref(false);
 const store = useStore();
+const formRef = ref(null);
+const ruleForm = ref({
+  pid: "",
+  title: "",
+  img_url: "",
+  is_hide: 2,
+  sort: "",
+  status: 1,
+});
+const rules = ref({
+  title: [{ required: true, message: "请输入名称", trigger: "blur" }],
+  img_url: [{ required: true, message: "请上传图片", trigger: "blur" }],
+  is_hide: [{ required: true, message: "请选择", trigger: "change" }],
+  status: [{ required: true, message: "请选择", trigger: "change" }],
+  sort: [{ required: true, message: "请输入排序", trigger: "blur" }],
+});
 // 表单数据
 const formData = ref({ status: 1, only_top: 0 });
 const formItems = ref([
@@ -158,6 +235,32 @@ const rowsDynamicFormRef = ref();
 const getRowKeys = (row) => {
   return row.id;
 };
+// 上传
+const beforeAvatarUpload = (rawFile) => {
+  console.log(rawFile);
+  if (rawFile.type.indexOf("image/") < 0) {
+    ElMessage.error("上传文件格式错误");
+    return false;
+  }
+  return true;
+};
+
+const uploadFile = (file) => {
+  let formDatas = new FormData();
+  formDatas.append("file", file.file);
+  API.activity.postFileOss(formDatas).then((res) => {
+    console.log(res);
+    ruleForm.value.img_url = res.data.value;
+    formRef.value.clearValidate("img_url");
+  });
+};
+
+const changePid = (val) => {
+  if (val) {
+    ruleForm.value.img_url = "";
+  }
+};
+
 //重置表单
 const resetForm = (tag) => {
   if (tag) rowsDynamicFormRef?.value.invokeFormFn("resetFields");
@@ -166,16 +269,6 @@ const resetForm = (tag) => {
 const tableRef = ref();
 const loading = ref(false);
 
-// 热门or上下架
-const changeHandle = (type) => {
-  if (type == "on") {
-    dialogTitle.value = "上架下架";
-  } else {
-    dialogTitle.value = "热门切换";
-  }
-  dialogVisible.value = true;
-};
-
 // 查询
 const searchForm = () => {
   getList();
@@ -183,28 +276,30 @@ const searchForm = () => {
 
 const handleClose = () => {
   dialogVisible.value = false;
+  nextTick(() => {
+    formRef.value.resetFields();
+  });
 };
 const confirmSubmit = async () => {
-  const arr = multipleSelection.value.map((el) => el.id);
-  let params = {
-    moments_ids: arr.join(","),
-  };
-  let res = "";
-  if (dialogTitle.value == "上架下架") {
-    params["is_on"] = isChoose.value;
-    res = await API.post.setMomentsUpDown(params);
-  } else {
-    params["is_hot"] = isChoose.value;
-    res = await API.post.setMomentsHot(params);
-  }
-  console.log(res);
-  if (res.code == 0) {
-    handleClose();
-    multipleSelection.value = [];
-    tableRef.value.clearChoose();
-    ElMessage.success("操作成功");
-    tableRef.value.refreshTable(false);
-  }
+  formRef.value.validate(async (valid) => {
+    if (valid) {
+      let params = {
+        ...ruleForm.value,
+        pid: ruleForm.value.pid ? ruleForm.value.pid : 0,
+      };
+      if (dialogTitle.value == "新增") {
+        delete params.id;
+      }
+      API.activity.saveCategory(params).then((res) => {
+        console.log(res);
+        getList();
+        handleClose();
+        ElMessage.success("操作成功");
+      });
+    } else {
+      return false;
+    }
+  });
 };
 const getList = () => {
   let params = {
@@ -217,13 +312,43 @@ const getList = () => {
   });
 };
 
+const editType = (row) => {
+  getSel();
+  dialogTitle.value = "编辑";
+  dialogVisible.value = true;
+  nextTick(() => {
+    let rows = JSON.parse(
+      JSON.stringify({ ...row, pid: row.pid == 0 ? "" : row.pid })
+    );
+    delete rows.children;
+    ruleForm.value = rows;
+  });
+};
+
+const addType = () => {
+  getSel();
+  dialogTitle.value = "新增";
+  dialogVisible.value = true;
+};
+const typeSel = ref([]);
+const getSel = () => {
+  let params = {
+    status: 1,
+    only_top: 1,
+  };
+  API.activity.getCategoryTree(params).then((res) => {
+    console.log(res);
+    typeSel.value = res.data;
+  });
+};
+
 onMounted(() => {
   getList();
 });
 </script>
 
 <style lang="scss" scoped>
-.post-manage {
+.activity-type {
   .queryModule {
     border-radius: 0 0 4px 4px;
   }
@@ -246,6 +371,32 @@ onMounted(() => {
     justify-content: center;
     span {
       margin-right: 16px;
+    }
+  }
+  :deep(.avatar-uploader) {
+    .el-upload {
+      border: 1px dashed var(--el-border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: var(--el-transition-duration-fast);
+    }
+
+    .el-upload:hover {
+      border-color: var(--el-color-primary);
+    }
+
+    .el-icon.avatar-uploader-icon {
+      font-size: 28px;
+      color: #8c939d;
+      width: 120px;
+      height: 120px;
+      text-align: center;
+    }
+    img {
+      width: 120px;
+      height: 120px;
     }
   }
 }

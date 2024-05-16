@@ -51,5 +51,37 @@ const activity = {
       params: data
     });
   },
+  // v2分类-保存编辑活动分类
+  saveCategory(data: any): AxiosPromise<any> {
+    return http({
+      url: '/sundry/saveCategory',
+      method: 'POST',
+      data
+    });
+  },
+  // 文件上传-表单方式提交后台上传oss
+  postFileOss(data: any): AxiosPromise<any> {
+    return http({
+      url: '/sundry/postFileOss',
+      method: 'POST',
+      data
+    });
+  },
+  // v2活动-新增或编辑活动
+  saveTask(data: any): AxiosPromise<any> {
+    return http({
+      url: '/task/saveTask',
+      method: 'POST',
+      data
+    });
+  },
+  // v2活动-根据活动id获取活动详情
+  getTaskInfo(data: any): AxiosPromise<any> {
+    return http({
+      url: '/task/getTaskInfo',
+      method: 'POST',
+      data
+    });
+  },
 };
 export default activity;
