@@ -42,12 +42,6 @@ const actvity = {
           component: () =>
             import('/src/view/activityManage/activityList/activityListIndex.vue')
         },
-        {
-          path: '/activityManage/activityList/detail',
-          name: 'activityListDetail',
-          component: () =>
-            import('/src/view/activityManage/activityList/activityListDetail.vue')
-        }
       ]
     },
     {
@@ -64,6 +58,23 @@ const actvity = {
           name: 'orderManageList',
           component: () =>
             import('/src/view/activityManage/orderManage/orderManageIndex.vue')
+        }
+      ]
+    },
+    {
+      path: '/activityManage/businessManage',
+      name: 'businessManage',
+      redirect: '/activityManage/businessManage/list',
+      component: childMain,
+      meta: {
+        title: '商家管理'
+      },
+      children: [
+        {
+          path: '/activityManage/businessManage/list',
+          name: 'businessManageList',
+          component: () =>
+            import('/src/view/activityManage/businessManage/businessIndex.vue')
         }
       ]
     }

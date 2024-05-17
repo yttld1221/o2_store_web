@@ -10,6 +10,7 @@
     >
       <div class="form-box">
         <el-form
+          :disabled="dialogTitle == '查看'"
           :rules="rules"
           ref="formRef"
           :model="ruleForm"
@@ -71,7 +72,11 @@
               </el-select>
             </el-form-item>
           </div>
-          <el-form-item label="封面配图" prop="img_url">
+          <el-form-item
+            :class="{ 'hidden-upload': dialogTitle == '查看' }"
+            label="封面配图"
+            prop="img_url"
+          >
             <uoloadFile
               :limit="10"
               :list="ruleForm.img_url"
@@ -80,7 +85,10 @@
           </el-form-item>
           <div class="form-item-box flex-align">
             <el-form-item label="是否商品" prop="is_product">
-              <el-radio-group v-model="ruleForm.is_product">
+              <el-radio-group
+                @change="(val) => changeRadio(val, 'is_product')"
+                v-model="ruleForm.is_product"
+              >
                 <el-radio :value="1">是</el-radio>
                 <el-radio :value="2">否</el-radio>
               </el-radio-group>
@@ -90,10 +98,23 @@
               label="自动核销"
               prop="is_auto_check"
             >
-              <el-radio-group v-model="ruleForm.is_auto_check">
+              <el-radio-group
+                @change="(val) => changeRadio(val, 'is_auto_check')"
+                v-model="ruleForm.is_auto_check"
+              >
                 <el-radio :value="1">是</el-radio>
                 <el-radio :value="2">否</el-radio>
               </el-radio-group>
+              <el-form-item
+                v-if="ruleForm.is_auto_check == 2"
+                label="快递配送"
+                prop="is_delivery"
+              >
+                <el-radio-group v-model="ruleForm.is_delivery">
+                  <el-radio :value="1">是</el-radio>
+                  <el-radio :value="2">否</el-radio>
+                </el-radio-group>
+              </el-form-item>
             </el-form-item>
           </div>
           <div class="form-item-box flex-align">
@@ -196,7 +217,11 @@
               ></el-input>
             </el-form-item>
           </div>
-          <el-form-item label="活动详情" prop="content_html">
+          <el-form-item
+            :class="{ 'hidden-upload': dialogTitle == '查看' }"
+            label="活动详情"
+            prop="content_html"
+          >
             <uoloadFile
               :limit="1000"
               :list="ruleForm.content_html"
@@ -269,12 +294,14 @@ const ruleForm = ref({
   is_product: "",
   category_id: "",
   open_msg_service: 1,
+  is_delivery: 2,
   addr: "",
   shop_id: "",
   setting_id: 0,
   title: "",
   img_url: "",
   buy_level: 2,
+  is_auto_check: 0,
 });
 const rules = ref({
   title: [{ required: true, message: "请输入名称", trigger: "blur" }],
@@ -285,6 +312,7 @@ const rules = ref({
   is_hot: [{ required: true, message: "请选择", trigger: "change" }],
   is_product: [{ required: true, message: "请选择", trigger: "change" }],
   is_auto_check: [{ required: true, message: "请选择", trigger: "change" }],
+  is_delivery: [{ required: true, message: "请选择", trigger: "change" }],
   category_id: [{ required: true, message: "请选择类型", trigger: "change" }],
   buy_level: [
     { required: true, message: "请选择参与的最低会员等级", trigger: "change" },
@@ -302,14 +330,21 @@ const rules = ref({
     { required: true, message: "请选择开始时间", trigger: "change" },
   ],
   end_time: [{ required: true, message: "请选择结束时间", trigger: "change" }],
-  area_codes: [
-    { required: true, message: "请选择显示地区", trigger: "change" },
-  ],
 });
 
 const formRef = ref();
 const optionList = ref([]);
 const sjSel = ref([]);
+
+// 改变单选
+const changeRadio = (val, key) => {
+  if (key == "is_product") {
+    ruleForm.value.is_auto_check = 0;
+    ruleForm.value.is_delivery = 2;
+  } else {
+    ruleForm.value.is_delivery = 2;
+  }
+};
 
 const confirmSubmit = async () => {
   formRef.value.validate(async (valid) => {
@@ -326,7 +361,7 @@ const confirmSubmit = async () => {
         id: formId.value,
         ...ruleForm.value,
         area_codes: area_codes.join(","),
-        shop_id: ruleForm.value.shop_id ? ruleForm.value.shop_id : 0,
+        shop_id: ruleForm.value.shop_id ? +ruleForm.value.shop_id : 0,
         original_price: changeFloat(ruleForm.value.original_price),
         in_price: changeFloat(ruleForm.value.in_price),
         sale_price: changeFloat(ruleForm.value.sale_price),
@@ -346,6 +381,9 @@ const confirmSubmit = async () => {
 };
 
 const changeFloat = (val) => {
+  if (ruleForm.value.is_product != 1) {
+    val = 0;
+  }
   return parseFloat(val).toFixed(2);
 };
 
@@ -384,17 +422,38 @@ const dialogTitle = ref("");
 const dialogVisible = ref(false);
 const formId = ref(0);
 const handleOpen = (title, id = 0) => {
+  getSel();
   dialogTitle.value = title;
   dialogVisible.value = true;
-  if (id > 0) {
+  if (title != "新增") {
     formId.value = id;
     getDetail();
   }
 };
 
 const getDetail = () => {
-  API.activity.getTaskInfo({ id: formId.value }).then((res) => {
+  API.activity.getTaskInfo({ task_id: formId.value }).then((res) => {
     console.log(res);
+    let area_codes = "";
+    if (res.data.area_codes) {
+      let arr = res.data.area_codes.split(",");
+      let addArr = [];
+      arr.forEach((el) => {
+        areaSel.value.forEach((item) => {
+          item.children.forEach((child) => {
+            if (el == child.value) {
+              addArr.push([item.value, el]);
+            }
+          });
+        });
+      });
+      area_codes = addArr;
+    }
+    ruleForm.value = {
+      ...res.data,
+      shop_id: res.data.shop_id ? res.data.shop_id : "",
+      area_codes,
+    };
   });
 };
 
@@ -426,7 +485,6 @@ const getArea = () => {
   });
 };
 onMounted(() => {
-  getSel();
   getArea();
 });
 </script>
@@ -437,13 +495,22 @@ onMounted(() => {
     padding: 15px 20px;
   }
   .form-item-box {
-    .el-form-item {
+    & > .el-form-item {
       flex: 1;
     }
   }
   .flex-align {
     display: flex;
     align-items: center;
+  }
+  :deep(.hidden-upload) {
+    .el-upload {
+      display: none;
+    }
+  }
+  :deep(.el-dialog__body) {
+    height: 70vh;
+    overflow-y: auto;
   }
 }
 </style>

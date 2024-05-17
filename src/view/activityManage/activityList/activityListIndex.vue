@@ -67,10 +67,12 @@
           />
         </template>
         <template v-slot:column|fixbtn="scope">
-          <el-button type="primary" link @click="editForm(scope.row.id)"
+          <el-button type="primary" link @click="editForm(scope.row.id, '编辑')"
             >编辑</el-button
           >
-          <el-button type="primary" link>查看</el-button>
+          <el-button type="primary" link @click="editForm(scope.row.id, '查看')"
+            >查看</el-button
+          >
           <el-button
             @click="handleClick(scope.row, 'on', 1)"
             v-if="scope.row.is_on == 2"
@@ -503,8 +505,8 @@ const getSel = () => {
 };
 const dialogDetail = ref();
 
-const editForm = (id) => {
-  dialogDetail.value.handleOpen("编辑", id);
+const editForm = (id, title) => {
+  dialogDetail.value.handleOpen(title, id);
 };
 
 const addActivity = () => {

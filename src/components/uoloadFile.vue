@@ -66,21 +66,23 @@ onMounted(() => {
         url: item,
       };
     });
+  } else {
+    fileList.value = [];
   }
 });
 watch(
   () => props.list,
   (newVal) => {
-    if (newVal) {
-      if (props.list) {
-        let arr = props.list.split(",");
-        fileList.value = arr.map((item) => {
-          return {
-            name: "",
-            url: item,
-          };
-        });
-      }
+    if (props.list) {
+      let arr = props.list.split(",");
+      fileList.value = arr.map((item) => {
+        return {
+          name: "",
+          url: item,
+        };
+      });
+    } else {
+      fileList.value = [];
     }
   }
 );

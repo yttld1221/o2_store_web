@@ -1,7 +1,7 @@
 <template>
   <div class="activity-type">
     <div class="queryModule">
-      <queryHeader title="活动分类管理">
+      <queryHeader title="商家管理">
         <template #queryBtns>
           <el-button @click="resetForm(true)">重置</el-button>
           <el-button type="primary" @click="searchForm">查询</el-button>
@@ -25,52 +25,37 @@
           <el-button type="primary" @click="addType()">新增</el-button>
         </div>
       </div>
-      <el-table :data="tableData" row-key="id" v-loading="loading">
-        <el-table-column prop="id" label="ID" />
-        <el-table-column prop="title" label="名称" />
-        <el-table-column label="图片">
-          <template #default="scope">
-            <el-image
-              v-if="scope.row.img_url"
-              preview-teleported
-              style="width: 75px; height: 35px"
-              :src="scope.row.img_url"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="[scope.row.img_url]"
-              :initial-index="0"
-              fit="cover"
-            />
-            <span v-else>-</span>
-          </template></el-table-column
-        >
-        <el-table-column prop="sort" label="排序" />
-        <el-table-column label="是否隐藏">
-          <template #default="scope">
-            {{ scope.row.is_hide == 1 ? "是" : "否" }}
-          </template>
-        </el-table-column>
-        <el-table-column label="是否开启">
-          <template #default="scope">
-            {{ scope.row.status == 1 ? "启用" : "禁用" }}
-          </template></el-table-column
-        >
-        <el-table-column label="操作" width="100">
-          <template #default="scope">
-            <el-button type="primary" link @click="editType(scope.row)"
-              >编辑</el-button
-            >
-          </template>
-        </el-table-column>
-      </el-table>
+      <common-table
+        ref="tableRef"
+        :tableHeader="tableHeader"
+        :loading="true"
+        :queryParams="paramsPage"
+        :ajaxGetData="getTableData"
+        :paginationConfig="paginationConfig"
+      >
+        <template v-slot:column|addr="scope">
+          {{ showVal(scope.row.addr) }}
+        </template>
+        <template v-slot:column|phone="scope">
+          {{ showVal(scope.row.phone) }}
+        </template>
+        <template v-slot:column|person="scope">
+          {{ showVal(scope.row.person) }}
+        </template>
+        <template v-slot:column|remark="scope">
+          {{ showVal(scope.row.remark) }}
+        </template>
+        <template v-slot:column|status="scope">
+          {{ scope.row.status == 1 ? "启用" : "禁用" }}
+        </template>
+      </common-table>
     </div>
     <el-dialog
       :close-on-click-modal="false"
       :before-close="handleClose"
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="400px"
+      width="35%"
       class="dialogContainer"
     >
       <div class="dialog-box">
@@ -80,54 +65,27 @@
           :model="ruleForm"
           label-width="95px"
         >
-          <el-form-item prop="pid" label="父级分类">
-            <el-select
-              @change="changePid"
-              clearable
-              v-model="ruleForm.pid"
-              placeholder="不填默认顶级分类"
-            >
-              <el-option
-                v-for="(item, index) in typeSel"
-                :key="index"
-                :label="item.title"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="名称" prop="title">
+          <el-form-item label="商户名称" prop="merchant">
             <el-input
-              v-model.trim="ruleForm.title"
+              v-model.trim="ruleForm.merchant"
               placeholder="请输入"
             ></el-input>
           </el-form-item>
-          <el-form-item label="图片" prop="img_url" v-if="!ruleForm.pid">
-            <el-upload
-              class="avatar-uploader"
-              action="/"
-              :limit="1"
-              :multiple="false"
-              :http-request="uploadFile"
-              :show-file-list="false"
-              :before-upload="beforeAvatarUpload"
-            >
-              <img
-                v-if="ruleForm.img_url"
-                :src="ruleForm.img_url"
-                class="avatar"
-              />
-              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-            </el-upload>
-          </el-form-item>
-          <el-form-item label="是否隐藏" prop="is_hide">
-            <el-radio-group v-model="ruleForm.is_hide">
-              <el-radio :value="2">显示</el-radio>
-              <el-radio :value="1">隐藏</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="排序" prop="sort">
+          <el-form-item label="地址" prop="addr">
             <el-input
-              v-model.trim="ruleForm.sort"
+              v-model.trim="ruleForm.addr"
+              placeholder="请输入"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="联系电话" prop="phone">
+            <el-input
+              v-model.trim="ruleForm.phone"
+              placeholder="请输入"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="联系人" prop="person">
+            <el-input
+              v-model.trim="ruleForm.person"
               placeholder="请输入"
             ></el-input>
           </el-form-item>
@@ -136,6 +94,14 @@
               <el-option label="启用" :value="1" />
               <el-option label="禁用" :value="2" />
             </el-select>
+          </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input
+              v-model="ruleForm.remark"
+              :autosize="{ minRows: 4 }"
+              type="textarea"
+              placeholder="请输入"
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -180,23 +146,41 @@ const dialogVisible = ref(false);
 const store = useStore();
 const formRef = ref(null);
 const ruleForm = ref({
-  pid: "",
-  title: "",
-  img_url: "",
-  is_hide: 2,
-  sort: "",
+  id: 0,
+  merchant: "",
+  addr: "",
+  person: "",
+  phone: "",
+  remark: "",
   status: 1,
 });
 const rules = ref({
-  title: [{ required: true, message: "请输入名称", trigger: "blur" }],
-  img_url: [{ required: true, message: "请上传图片", trigger: "blur" }],
-  is_hide: [{ required: true, message: "请选择", trigger: "change" }],
+  merchant: [{ required: true, message: "请输入商户名称", trigger: "blur" }],
   status: [{ required: true, message: "请选择", trigger: "change" }],
-  sort: [{ required: true, message: "请输入排序", trigger: "blur" }],
 });
 // 表单数据
-const formData = ref({ status: 1, only_top: 0 });
+const formData = ref({ status: 1 });
 const formItems = ref([
+  {
+    label: "商户名称",
+    prop: "merchant",
+    type: "input",
+  },
+  {
+    label: "地址",
+    prop: "addr",
+    type: "input",
+  },
+  {
+    label: "联系电话",
+    prop: "phone",
+    type: "input",
+  },
+  {
+    label: "联系人",
+    prop: "person",
+    type: "input",
+  },
   {
     label: "启用状态",
     prop: "status",
@@ -205,19 +189,8 @@ const formItems = ref([
     labelKey: "label",
     options: [
       { label: "全部", value: 0 },
-      { label: "是", value: 1 },
-      { label: "否", value: 2 },
-    ],
-  },
-  {
-    label: "是否顶级分类",
-    prop: "only_top",
-    type: "select",
-    valueKey: "value",
-    labelKey: "label",
-    options: [
-      { label: "全部", value: 0 },
-      { label: "是", value: 1 },
+      { label: "启用", value: 1 },
+      { label: "禁用", value: 2 },
     ],
   },
 ]);
@@ -225,54 +198,104 @@ const formItems = ref([
 const formAttrs = ref({
   "label-width": "90px",
 });
-const paramsPage = ref({ status: 1, only_top: 0 });
+const paramsPage = ref({ pageSize: 20 });
 const changeModel = (model, value, key) => {
   paramsPage.value = model;
 };
 
 const rowsDynamicFormRef = ref();
 
-const getRowKeys = (row) => {
-  return row.id;
-};
-// 上传
-const beforeAvatarUpload = (rawFile) => {
-  console.log(rawFile);
-  if (rawFile.type.indexOf("image/") < 0) {
-    ElMessage.error("上传文件格式错误");
-    return false;
-  }
-  return true;
+const showVal = (val) => {
+  return val ? val : "-";
 };
 
-const uploadFile = (file) => {
-  let formDatas = new FormData();
-  formDatas.append("file", file.file);
-  API.activity.postFileOss(formDatas).then((res) => {
-    console.log(res);
-    ruleForm.value.img_url = res.data.value;
-    formRef.value.clearValidate("img_url");
-  });
-};
-
-const changePid = (val) => {
-  if (val) {
-    ruleForm.value.img_url = "";
-  }
-};
-
-//重置表单
-const resetForm = (tag) => {
-  if (tag) rowsDynamicFormRef?.value.invokeFormFn("resetFields");
-  getList();
-};
 const tableRef = ref();
-const loading = ref(false);
 
 // 查询
 const searchForm = () => {
-  getList();
+  tableRef.value.refreshTable();
 };
+const tableHeader = reactive([
+  {
+    label: "ID",
+    prop: "id",
+  },
+  {
+    label: "商户名称",
+    prop: "merchant",
+    width: "200",
+  },
+  {
+    label: "地址",
+    prop: "addr",
+    width: "200",
+    colType: "column",
+  },
+  {
+    label: "联系电话",
+    prop: "phone",
+    colType: "column",
+  },
+  {
+    label: "联系人",
+    prop: "person",
+    colType: "column",
+  },
+  {
+    label: "启用状态",
+    prop: "status",
+    colType: "column",
+  },
+  {
+    label: "备注信息",
+    prop: "remark",
+    width: "200",
+    colType: "column",
+  },
+  {
+    label: "创建时间",
+    prop: "created_at",
+    width: "170",
+  },
+  {
+    label: "更新时间",
+    prop: "updated_at",
+    width: "170",
+  },
+  {
+    label: "创建人",
+    prop: "create_name",
+  },
+  {
+    label: "修改人",
+    prop: "update_name",
+  },
+  {
+    label: "操作",
+    colType: "btns",
+    width: "100",
+    fixed: "right",
+    btns: [
+      {
+        label: "编辑",
+        type: "primary",
+        link: true,
+        click: (row, rowIndex, btnIndex) => {
+          dialogTitle.value = "编辑";
+          dialogVisible.value = true;
+          nextTick(() => {
+            ruleForm.value = JSON.parse(JSON.stringify(row));
+          });
+        },
+      },
+    ],
+  },
+]);
+
+const getTableData = (param) => {
+  return API.activity.getShopList(param).then((res) => res);
+};
+const paginationConfig = reactive({});
 
 const handleClose = () => {
   dialogVisible.value = false;
@@ -285,14 +308,10 @@ const confirmSubmit = async () => {
     if (valid) {
       let params = {
         ...ruleForm.value,
-        pid: ruleForm.value.pid ? ruleForm.value.pid : 0,
       };
-      if (dialogTitle.value == "新增") {
-        delete params.id;
-      }
-      API.activity.saveCategory(params).then((res) => {
+      API.activity.saveShop(params).then((res) => {
         console.log(res);
-        getList();
+        resetForm(dialogTitle.value == "新增" ? true : false);
         handleClose();
         ElMessage.success("操作成功");
       });
@@ -301,21 +320,14 @@ const confirmSubmit = async () => {
     }
   });
 };
-const getList = () => {
-  loading.value = true;
-  let params = {
-    status: paramsPage.value.status,
-    only_top: paramsPage.value.only_top,
-  };
-  API.activity.getCategoryTree(params).then((res) => {
-    console.log(res);
-    loading.value = false;
-    tableData.value = res.data;
-  });
+
+//重置表单
+const resetForm = (tag) => {
+  if (tag) rowsDynamicFormRef?.value.invokeFormFn("resetFields");
+  tableRef.value.refreshTable(tag);
 };
 
 const editType = (row) => {
-  getSel();
   dialogTitle.value = "编辑";
   dialogVisible.value = true;
   nextTick(() => {
@@ -328,25 +340,11 @@ const editType = (row) => {
 };
 
 const addType = () => {
-  getSel();
   dialogTitle.value = "新增";
   dialogVisible.value = true;
 };
-const typeSel = ref([]);
-const getSel = () => {
-  let params = {
-    status: 1,
-    only_top: 1,
-  };
-  API.activity.getCategoryTree(params).then((res) => {
-    console.log(res);
-    typeSel.value = res.data;
-  });
-};
 
-onMounted(() => {
-  getList();
-});
+onMounted(() => {});
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div class="post-manage">
     <div class="queryModule">
-      <queryHeader title="朋友圈管理">
+      <queryHeader title="订单管理">
         <template #queryBtns>
           <el-button @click="resetForm(true)">重置</el-button>
           <el-button type="primary" @click="searchForm">查询</el-button>
@@ -22,17 +22,8 @@
     <div class="listModule">
       <div class="btnsContainer">
         <div class="btns left">
-          <el-button
-            :disabled="!multipleSelection.length"
-            type="primary"
-            @click="changeHandle('hot')"
-            >热门切换</el-button
-          >
-          <el-button
-            :disabled="!multipleSelection.length"
-            type="primary"
-            @click="changeHandle('on')"
-            >上下架切换</el-button
+          <el-button :disabled="!multipleSelection.length" type="primary"
+            >批量结算</el-button
           >
         </div>
       </div>
@@ -46,24 +37,40 @@
         @selection-change="handleSelectionChange"
         :row-key="getRowKeys"
       >
-        <template v-slot:column|is_hot="scope">
-          {{ selectText[scope.row.is_hot] }}
+        <template v-slot:column|status="scope">
+          {{ selectText[scope.row.status] }}
         </template>
-        <template v-slot:column|is_on="scope">
-          {{ selectText[scope.row.is_on] }}
+        <template v-slot:column|settlement_status="scope">
+          {{ scope.row.settlement_status == 1 ? "已结算" : "未结算" }}
         </template>
-        <template v-slot:column|avatar_url="scope">
-          <el-image
-            preview-teleported
-            style="width: 75px; height: 35px"
-            :src="scope.row.avatar_url"
-            :zoom-rate="1.2"
-            :max-scale="7"
-            :min-scale="0.2"
-            :preview-src-list="[scope.row.avatar_url]"
-            :initial-index="0"
-            fit="cover"
-          />
+        <template v-slot:column|pay_time="scope">{{
+          showVal(scope.row.pay_time)
+        }}</template>
+        <template v-slot:column|check_at="scope">{{
+          showVal(scope.row.check_at)
+        }}</template>
+        <template v-slot:column|settlement_at="scope">{{
+          showVal(scope.row.settlement_at)
+        }}</template>
+        <template v-slot:column|check_name="scope">{{
+          showVal(scope.row.check_name)
+        }}</template>
+        <template v-slot:column|settlement_name="scope">{{
+          showVal(scope.row.settlement_name)
+        }}</template>
+        <template v-slot:column|fixbtn="scope">
+          <el-button type="primary" link @click="editForm(scope.row.id, '查看')"
+            >查看</el-button
+          >
+          <el-button
+            type="primary"
+            v-if="
+              [2, 5].includes(scope.row.status) && scope.row.is_delivery == 1
+            "
+            link
+            @click="editForm(scope.row.id, '编辑')"
+            >发货</el-button
+          >
         </template>
       </common-table>
     </div>
@@ -71,25 +78,64 @@
       :close-on-click-modal="false"
       :before-close="handleClose"
       v-model="dialogVisible"
-      :title="dialogTitle"
-      width="400px"
+      title="查看详情"
+      width="500px"
       class="dialogContainer"
     >
       <div class="dialog-box flex-align">
-        <span>是否{{ dialogTitle == "热门切换" ? "热门" : "上架" }}</span>
-        <el-radio-group v-model="isChoose">
-          <el-radio value="1" size="large">是</el-radio>
-          <el-radio value="2" size="large">否</el-radio>
-        </el-radio-group>
+        <el-form
+          :rules="rules"
+          ref="formRef"
+          :model="ruleForm"
+          label-width="130px"
+        >
+          <el-form-item label="ID">
+            {{ ruleForm.id }}
+          </el-form-item>
+          <el-form-item label="订单状态">{{
+            ruleForm.status ? selectText[ruleForm.status] : "-"
+          }}</el-form-item>
+          <el-form-item label="结算状态">{{
+            ruleForm.settlement_status == 1 ? "已结算" : "未结算"
+          }}</el-form-item>
+          <el-form-item label="支付时间">{{
+            showVal(ruleForm.pay_time)
+          }}</el-form-item>
+          <el-form-item label="订单总金额">{{
+            showVal(ruleForm.total_fee)
+          }}</el-form-item>
+          <el-form-item label="核销时间">{{
+            showVal(ruleForm.check_at)
+          }}</el-form-item>
+          <el-form-item label="实际支付金额">{{
+            showVal(ruleForm.actual_fee)
+          }}</el-form-item>
+          <el-form-item label="抵扣金额">{{
+            showVal(ruleForm.deduction_fee)
+          }}</el-form-item>
+          <el-form-item label="购买数量">{{
+            showVal(ruleForm.num)
+          }}</el-form-item>
+          <el-form-item label="下单时间">{{
+            showVal(ruleForm.created_at)
+          }}</el-form-item>
+          <el-form-item label="客户姓名">{{
+            showVal(ruleForm.user_name)
+          }}</el-form-item>
+          <el-form-item label="产品名称">{{
+            showVal(ruleForm.title)
+          }}</el-form-item>
+          <el-form-item label="商户名称">{{
+            showVal(ruleForm.merchant)
+          }}</el-form-item>
+          <el-form-item label="核销人员姓名">{{
+            showVal(ruleForm.check_name)
+          }}</el-form-item>
+          <el-form-item label="结算人员姓名">{{
+            showVal(ruleForm.settlement_name)
+          }}</el-form-item>
+        </el-form>
       </div>
-      <template #footer>
-        <span class="dialogFooter">
-          <el-button @click="handleClose" class="cancelBtn">取消</el-button>
-          <el-button type="primary" @click="confirmSubmit" class="confirmBtn"
-            >确定</el-button
-          >
-        </span>
-      </template>
     </el-dialog>
   </div>
 </template>
@@ -115,64 +161,80 @@ const route = useRoute();
 const _this: any = getCurrentInstance();
 const API: any = _this.proxy.$API;
 const message: any = _this.proxy.$Message;
-const commentRef = ref();
-const previewRef = ref();
-const selectText = ref({ 1: "是", 2: "否" });
+const ruleForm = ref({});
+const selectText = ref({
+  1: "待支付",
+  2: "待发货",
+  3: "待评价",
+  4: "已取消",
+  5: "待收货",
+  6: "已完成",
+});
 
-const dialogTitle = ref("");
 const dialogVisible = ref(false);
-const isChoose = ref("1");
 const store = useStore();
 // 表单数据
-const formData = ref({});
+const formData = ref({ status: 0, settlement_status: 0 });
 const formItems = ref([
   {
-    label: "主题",
-    prop: "title",
+    label: "订单状态",
+    prop: "status",
+    type: "select",
+    valueKey: "value",
+    labelKey: "label",
+    options: [
+      { label: "全部", value: 0 },
+      { label: "已支付", value: 2 },
+      { label: "已核销", value: 3 },
+    ],
+  },
+  {
+    label: "结算状态",
+    prop: "settlement_status",
+    type: "select",
+    valueKey: "value",
+    labelKey: "label",
+    options: [
+      { label: "全部", value: 0 },
+      { label: "已结算", value: 1 },
+      { label: "未结算", value: 2 },
+    ],
+  },
+  {
+    label: "客户姓名",
+    prop: "user_name",
     type: "input",
   },
   {
-    label: "是否热门",
-    prop: "is_hot",
-    type: "select",
-    valueKey: "value",
-    labelKey: "label",
-    options: [
-      { label: "不限", value: 0 },
-      { label: "是", value: 1 },
-      { label: "否", value: 2 },
-    ],
+    label: "产品名称",
+    prop: "product_name",
+    type: "input",
   },
   {
-    label: "是否上架",
-    prop: "is_on",
-    type: "select",
-    valueKey: "value",
-    labelKey: "label",
-    options: [
-      { label: "不限", value: 0 },
-      { label: "是", value: 1 },
-      { label: "否", value: 2 },
-    ],
+    label: "商户名称",
+    prop: "merchant",
+    type: "input",
   },
   {
-    label: "类型",
-    prop: "type",
-    type: "select",
-    valueKey: "value",
-    labelKey: "label",
-    options: [
-      { label: "话题", value: "话题" },
-      { label: "组队/搭子", value: "组队/搭子" },
-      { label: "分享/安利", value: "分享/安利" },
-      { label: "二手闲置", value: "二手闲置" },
-      { label: "兼职", value: "兼职" },
-      { label: "表白", value: "表白" },
-      { label: "求助", value: "求助" },
-      { label: "其他", value: "其他" },
-    ],
+    label: "开始时间",
+    prop: "s_time",
+    type: "date-picker",
     attrs: {
       clearable: true,
+      valueFormat: "YYYY-MM-DD HH:mm:ss",
+      type: "datetime",
+      placeholder: "请选择日期及时间",
+    },
+  },
+  {
+    label: "截止时间",
+    prop: "e_time",
+    type: "date-picker",
+    attrs: {
+      clearable: true,
+      valueFormat: "YYYY-MM-DD HH:mm:ss",
+      type: "datetime",
+      placeholder: "请选择日期及时间",
     },
   },
 ]);
@@ -183,6 +245,10 @@ const formAttrs = ref({
 const paramsPage = ref({ pageSize: 20 });
 const changeModel = (model, value, key) => {
   paramsPage.value = model;
+};
+
+const showVal = (val) => {
+  return val ? val : "-";
 };
 
 const rowsDynamicFormRef = ref();
@@ -202,16 +268,6 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val;
 };
 
-// 热门or上下架
-const changeHandle = (type) => {
-  if (type == "on") {
-    dialogTitle.value = "上架下架";
-  } else {
-    dialogTitle.value = "热门切换";
-  }
-  dialogVisible.value = true;
-};
-
 // 查询
 const searchForm = () => {
   tableRef.value.refreshTable();
@@ -228,108 +284,97 @@ const tableHeader = reactive([
     prop: "id",
   },
   {
-    label: "文字内容",
+    label: "产品名称",
     prop: "title",
-    width: "250",
+    width: "200",
   },
   {
-    label: "热门",
-    prop: "is_hot",
+    label: "订单总金额",
+    prop: "total_fee",
+    width: "120",
+  },
+  {
+    label: "实际支付金额",
+    prop: "actual_fee",
+    width: "120",
+  },
+  {
+    label: "抵扣金额",
+    prop: "deduction_fee",
+  },
+  {
+    label: "购买数量",
+    prop: "num",
+  },
+  {
+    label: "订单状态",
+    prop: "status",
     colType: "column",
   },
   {
-    label: "类型",
-    prop: "type",
+    label: "结算状态",
+    prop: "settlement_status",
+    colType: "column",
   },
   {
-    label: "发布时间",
+    label: "下单时间",
     prop: "created_at",
     width: "170",
   },
   {
-    label: "点赞数",
-    prop: "thumb_num",
-  },
-  {
-    label: "评论数",
-    prop: "comment_num",
-  },
-  {
-    label: "发布人昵称",
-    prop: "nick_name",
-    width: "100",
-  },
-  {
-    label: "发布人头像",
-    prop: "avatar_url",
+    label: "支付时间",
+    prop: "pay_time",
+    width: "170",
     colType: "column",
-    width: "100",
   },
   {
-    label: "上架",
-    prop: "is_on",
+    label: "核销时间",
+    prop: "check_at",
+    width: "170",
     colType: "column",
+  },
+  {
+    label: "结算时间",
+    prop: "settlement_at",
+    width: "170",
+    colType: "column",
+  },
+  {
+    label: "商户名称",
+    prop: "merchant",
+  },
+  {
+    label: "客户姓名",
+    prop: "user_name",
+  },
+  {
+    label: "核销人员姓名",
+    prop: "check_name",
+    colType: "column",
+    width: "170",
+  },
+  {
+    label: "结算人员姓名",
+    prop: "settlement_name",
+    colType: "column",
+    width: "170",
   },
   {
     label: "操作",
-    colType: "btns",
-    width: "170",
+    colType: "column",
+    width: "120",
+    prop: "fixbtn",
     fixed: "right",
-    btns: [
-      {
-        label: "评论管理",
-        type: "primary",
-        link: true,
-        click: (row, rowIndex, btnIndex) => {
-          commentRef.value.openDialog(row.id);
-        },
-      },
-      {
-        label: "查看图文",
-        link: true,
-        type: "primary",
-        click: (row, rowIndex, btnIndex) => {
-          previewRef.value.openDialog(row);
-        },
-      },
-    ],
   },
 ]);
 
 const getTableData = (param) => {
-  return API.post.getMomentsList(param).then((res) => res);
+  return API.activity.getOrderList(param).then((res) => res);
 };
 const paginationConfig = reactive({});
 
 const handleClose = () => {
   dialogVisible.value = false;
-  isChoose.value = "1";
-};
-const confirmSubmit = async () => {
-  const arr = multipleSelection.value.map((el) => el.id);
-  let params = {
-    moments_ids: arr.join(","),
-  };
-  let res = "";
-  if (dialogTitle.value == "上架下架") {
-    params["is_on"] = isChoose.value;
-    res = await API.post.setMomentsUpDown(params);
-  } else {
-    params["is_hot"] = isChoose.value;
-    res = await API.post.setMomentsHot(params);
-  }
-  console.log(res);
-  if (res.code == 0) {
-    handleClose();
-    multipleSelection.value = [];
-    tableRef.value.clearChoose();
-    ElMessage.success("操作成功");
-    tableRef.value.refreshTable(false);
-  }
-};
-
-const changeList = () => {
-  tableRef.value.refreshTable(false);
 };
 </script>
 
@@ -352,12 +397,12 @@ const changeList = () => {
     display: flex;
     align-items: center;
   }
-
+  :deep(.el-dialog__body) {
+    height: 60vh;
+    overflow-y: auto;
+  }
   .dialog-box {
-    justify-content: center;
-    span {
-      margin-right: 16px;
-    }
+    width: 100%;
   }
 }
 </style>

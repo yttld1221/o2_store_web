@@ -189,6 +189,11 @@ export default {
               path: "/activityManage/orderManage/list",
               childNode: [],
             },
+            {
+              label: "商家管理",
+              path: "/activityManage/businessManage/list",
+              childNode: [],
+            },
           ],
           icon: "xcxyh",
         },

@@ -83,5 +83,21 @@ const activity = {
       data
     });
   },
+  // v2订单-分页获取订单列表
+  getOrderList(data: any): AxiosPromise<any> {
+    return http({
+      url: '/order/getOrderList',
+      method: 'POST',
+      data
+    });
+  },
+  // v2商家-新增或编辑商家
+  saveShop(data: any): AxiosPromise<any> {
+    return http({
+      url: '/sundry/saveShop',
+      method: 'POST',
+      data
+    });
+  },
 };
 export default activity;
