@@ -45,13 +45,19 @@ http.interceptors.response.use(
       return data;
     } else if (code == 410) {
       //登录过期 多端登录
-      Router.push('/login');
-      localStorage.removeItem('token')
-      ElMessage({
-        message: data.msg,
-        type: 'error',
-        duration: 2000
-      });
+      if (tag) {
+        tag = false;
+        Router.push('/login');
+        localStorage.removeItem('token')
+        ElMessage({
+          message: data.msg,
+          type: 'error',
+          duration: 2000
+        });
+        setTimeout(() => {
+          tag = true;
+        }, 500);
+      }
       return Promise.reject(response.data);
     } else {
       if (data.msg) {

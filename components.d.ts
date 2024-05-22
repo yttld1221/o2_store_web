@@ -9,12 +9,10 @@ declare module 'vue' {
   export interface GlobalComponents {
     ColFormItem: typeof import('./src/components/dynamicForm/ColFormItem.vue')['default']
     CommonTable: typeof import('./src/components/commonTable.vue')['default']
-    copy: typeof import('./src/components/dynamicForm/components/DfTimePicker copy.vue')['default']
     DfAutocomplete: typeof import('./src/components/dynamicForm/components/DfAutocomplete.vue')['default']
     DfCascader: typeof import('./src/components/dynamicForm/components/DfCascader.vue')['default']
     DfCheckbox: typeof import('./src/components/dynamicForm/components/DfCheckbox.vue')['default']
     DfDatePicker: typeof import('./src/components/dynamicForm/components/DfDatePicker.vue')['default']
-    DfDateTimePicker: typeof import('./src/components/dynamicForm/components/DfDateTimePicker.vue')['default']
     DfInput: typeof import('./src/components/dynamicForm/components/DfInput.vue')['default']
     DfInputNumber: typeof import('./src/components/dynamicForm/components/DfInputNumber.vue')['default']
     DfRadio: typeof import('./src/components/dynamicForm/components/DfRadio.vue')['default']

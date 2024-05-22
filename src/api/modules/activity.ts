@@ -99,5 +99,38 @@ const activity = {
       data
     });
   },
+   // v2发货-订单发货
+   delivery(data: any): AxiosPromise<any> {
+    return http({
+      url: '/order/delivery',
+      method: 'POST',
+      data
+    });
+  }, 
+  // v2发货-取消订单发货
+  cancelDelivery(data: any): AxiosPromise<any> {
+    return http({
+      url: '/order/cancelDelivery',
+      method: 'POST',
+      data
+    });
+  },
+  // v2退款-获取退款申请详情
+  getRefundInfo(data: any): AxiosPromise<any> {
+    return http({
+      url: '/order/getRefundInfo',
+      method: 'POST',
+      data
+    });
+  },
+  // v2退款-退款审核
+  refundCheck(data: any): AxiosPromise<any> {
+    return http({
+      url: '/order/refundCheck',
+      method: 'POST',
+      data
+    });
+  },
+  
 };
 export default activity;

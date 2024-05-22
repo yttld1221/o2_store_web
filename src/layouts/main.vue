@@ -195,7 +195,7 @@ export default {
               childNode: [],
             },
           ],
-          icon: "xcxyh",
+          icon: "hdgl",
         },
       ];
     });

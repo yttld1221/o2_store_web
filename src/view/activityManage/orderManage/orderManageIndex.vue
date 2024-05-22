@@ -58,27 +58,64 @@
         <template v-slot:column|settlement_name="scope">{{
           showVal(scope.row.settlement_name)
         }}</template>
+        <template v-slot:column|refund_id="scope">{{
+          scope.row.refund_id > 0 ? "是" : "否"
+        }}</template>
+        <template v-slot:column|refund_at="scope">{{
+          showVal(scope.row.refund_at)
+        }}</template>
+        <template v-slot:column|refund_check_at="scope">{{
+          showVal(scope.row.refund_check_at)
+        }}</template>
         <template v-slot:column|fixbtn="scope">
-          <el-button type="primary" link @click="editForm(scope.row.id, '查看')"
+          <el-button
+            type="primary"
+            link
+            @click="dataHandle(scope.row, '查看详情')"
             >查看</el-button
           >
           <el-button
             type="primary"
             v-if="
-              [2, 5].includes(scope.row.status) && scope.row.is_delivery == 1
+              [2].includes(scope.row.status) &&
+              scope.row.is_delivery == 1 &&
+              (!scope.row.refund_id ||
+                (scope.row.refund_id > 0 && scope.row.refund_check_status == 3))
             "
             link
-            @click="editForm(scope.row.id, '编辑')"
+            @click="dataHandle(scope.row, '发货')"
             >发货</el-button
+          >
+          <el-button
+            type="primary"
+            v-else-if="
+              [5].includes(scope.row.status) &&
+              scope.row.is_delivery == 1 &&
+              (!scope.row.refund_id ||
+                (scope.row.refund_id > 0 && scope.row.refund_check_status == 3))
+            "
+            link
+            @click="cancelFh(scope.row)"
+            >取消发货</el-button
+          >
+          <el-button
+            type="primary"
+            v-else-if="
+              scope.row.refund_id > 0 && scope.row.refund_check_status == 1
+            "
+            link
+            @click="dataHandle(scope.row, '退款审核')"
+            >退款审核</el-button
           >
         </template>
       </common-table>
     </div>
     <el-dialog
+      :class="{ 'add-form': dialogTitle != '查看详情' }"
       :close-on-click-modal="false"
       :before-close="handleClose"
       v-model="dialogVisible"
-      title="查看详情"
+      :title="dialogTitle"
       width="500px"
       class="dialogContainer"
     >
@@ -89,53 +126,126 @@
           :model="ruleForm"
           label-width="130px"
         >
-          <el-form-item label="ID">
-            {{ ruleForm.id }}
-          </el-form-item>
-          <el-form-item label="订单状态">{{
-            ruleForm.status ? selectText[ruleForm.status] : "-"
-          }}</el-form-item>
-          <el-form-item label="结算状态">{{
-            ruleForm.settlement_status == 1 ? "已结算" : "未结算"
-          }}</el-form-item>
-          <el-form-item label="支付时间">{{
-            showVal(ruleForm.pay_time)
-          }}</el-form-item>
-          <el-form-item label="订单总金额">{{
-            showVal(ruleForm.total_fee)
-          }}</el-form-item>
-          <el-form-item label="核销时间">{{
-            showVal(ruleForm.check_at)
-          }}</el-form-item>
-          <el-form-item label="实际支付金额">{{
-            showVal(ruleForm.actual_fee)
-          }}</el-form-item>
-          <el-form-item label="抵扣金额">{{
-            showVal(ruleForm.deduction_fee)
-          }}</el-form-item>
-          <el-form-item label="购买数量">{{
-            showVal(ruleForm.num)
-          }}</el-form-item>
-          <el-form-item label="下单时间">{{
-            showVal(ruleForm.created_at)
-          }}</el-form-item>
-          <el-form-item label="客户姓名">{{
-            showVal(ruleForm.user_name)
-          }}</el-form-item>
-          <el-form-item label="产品名称">{{
-            showVal(ruleForm.title)
-          }}</el-form-item>
-          <el-form-item label="商户名称">{{
-            showVal(ruleForm.merchant)
-          }}</el-form-item>
-          <el-form-item label="核销人员姓名">{{
-            showVal(ruleForm.check_name)
-          }}</el-form-item>
-          <el-form-item label="结算人员姓名">{{
-            showVal(ruleForm.settlement_name)
-          }}</el-form-item>
+          <template v-if="dialogTitle == '查看详情'">
+            <el-form-item label="ID">
+              {{ ruleForm.id }}
+            </el-form-item>
+            <el-form-item label="订单状态">{{
+              ruleForm.status ? selectText[ruleForm.status] : "-"
+            }}</el-form-item>
+            <el-form-item label="结算状态">{{
+              ruleForm.settlement_status == 1 ? "已结算" : "未结算"
+            }}</el-form-item>
+            <el-form-item label="支付时间">{{
+              showVal(ruleForm.pay_time)
+            }}</el-form-item>
+            <el-form-item label="订单总金额">{{
+              showVal(ruleForm.total_fee)
+            }}</el-form-item>
+            <el-form-item label="核销时间">{{
+              showVal(ruleForm.check_at)
+            }}</el-form-item>
+            <el-form-item label="实际支付金额">{{
+              showVal(ruleForm.actual_fee)
+            }}</el-form-item>
+            <el-form-item label="抵扣金额">{{
+              showVal(ruleForm.deduction_fee)
+            }}</el-form-item>
+            <el-form-item label="购买数量">{{
+              showVal(ruleForm.num)
+            }}</el-form-item>
+            <el-form-item label="下单时间">{{
+              showVal(ruleForm.created_at)
+            }}</el-form-item>
+            <el-form-item label="客户姓名">{{
+              showVal(ruleForm.user_name)
+            }}</el-form-item>
+            <el-form-item label="产品名称">{{
+              showVal(ruleForm.title)
+            }}</el-form-item>
+            <el-form-item label="商户名称">{{
+              showVal(ruleForm.merchant)
+            }}</el-form-item>
+            <el-form-item label="核销人员姓名">{{
+              showVal(ruleForm.check_name)
+            }}</el-form-item>
+            <el-form-item label="结算人员姓名">{{
+              showVal(ruleForm.settlement_name)
+            }}</el-form-item>
+          </template>
+          <template v-else-if="dialogTitle == '发货'">
+            <el-form-item label="快递公司名称" prop="deliver_company">
+              <el-select
+                v-model="ruleForm.deliver_company"
+                placeholder="请选择"
+              >
+                <el-option
+                  :label="item.name"
+                  :value="item.name"
+                  v-for="(item, index) in kdList"
+                  :key="index"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="快递单号" prop="deliver_no">
+              <el-form-item
+                class="no-item"
+                :prop="'deliver_no.' + index + '.noId'"
+                v-for="(item, index) in ruleForm.deliver_no"
+                :rules="rules.noId"
+                :key="index"
+              >
+                <el-input
+                  style="width: 100%"
+                  placeholder="请输入"
+                  v-model="item.noId"
+                ></el-input>
+              </el-form-item>
+              <el-button type="primary" @click="addNo()"
+                >添加快递单号</el-button
+              >
+            </el-form-item>
+          </template>
+          <template v-else-if="dialogTitle == '退款审核' && ruleForm.refund_id">
+            <el-form-item label="退款申请时间">{{
+              ruleForm.updated_at
+            }}</el-form-item>
+            <el-form-item label="退款申请金额"
+              >￥{{ ruleForm.money }}</el-form-item
+            >
+            <el-form-item label="退款原因">
+              <div>{{ showVal(ruleForm.remark) }}</div>
+              <div
+                class="file-list"
+                v-if="ruleForm.refund_img_url.length"
+              ></div>
+            </el-form-item>
+            <el-form-item label="审核意见" prop="status">
+              <el-radio-group v-model="ruleForm.status">
+                <el-radio :value="1">同意</el-radio>
+                <el-radio :value="2">拒绝</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="审核意见" prop="check_remark">
+              <el-input
+                :autosize="{ minRows: 4 }"
+                v-model="ruleForm.check_remark"
+                style="width: 100%"
+                type="textarea"
+                placeholder="请输入"
+              />
+            </el-form-item>
+          </template>
         </el-form>
       </div>
+      <template #footer v-if="dialogTitle != '查看详情'">
+        <span class="dialogFooter">
+          <el-button @click="handleClose" class="cancelBtn">取消</el-button>
+          <el-button type="primary" @click="confirmSubmit" class="confirmBtn"
+            >确定</el-button
+          >
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -155,13 +265,31 @@ import { useStore } from "vuex";
 import commonTable from "@/components/commonTable.vue";
 import queryHeader from "@/components/queryHeader.vue";
 import lineRadius from "@/components/lineRadius.vue";
+import { kdList } from "./kuaidi.js";
 import rowsDynamicForm from "@/components/dynamicForm/rowsDynamicForm.vue";
 const router = useRouter();
 const route = useRoute();
 const _this: any = getCurrentInstance();
 const API: any = _this.proxy.$API;
 const message: any = _this.proxy.$Message;
-const ruleForm = ref({});
+const ruleForm = ref({
+  order_id: "",
+  deliver_company: "",
+  deliver_no: [{ noId: "" }],
+});
+const rules = ref({
+  deliver_no: [
+    {
+      type: "array",
+      required: true,
+      message: "请添加快递单号",
+      trigger: "change",
+    },
+  ],
+  status: [{ required: true, message: "请选择", trigger: "change" }],
+  deliver_company: [{ required: true, message: "请选择", trigger: "change" }],
+  noId: [{ required: true, message: "请输入快递单号", trigger: "blur" }],
+});
 const selectText = ref({
   1: "待支付",
   2: "待发货",
@@ -172,6 +300,7 @@ const selectText = ref({
 });
 
 const dialogVisible = ref(false);
+const dialogTitle = ref("");
 const store = useStore();
 // 表单数据
 const formData = ref({ status: 0, settlement_status: 0 });
@@ -198,6 +327,18 @@ const formItems = ref([
       { label: "全部", value: 0 },
       { label: "已结算", value: 1 },
       { label: "未结算", value: 2 },
+    ],
+  },
+  {
+    label: "是否退款",
+    prop: "is_refund",
+    type: "select",
+    valueKey: "value",
+    labelKey: "label",
+    options: [
+      { label: "全部", value: 0 },
+      { label: "是", value: 1 },
+      { label: "否", value: 2 },
     ],
   },
   {
@@ -247,6 +388,40 @@ const changeModel = (model, value, key) => {
   paramsPage.value = model;
 };
 
+const addNo = () => {
+  ruleForm.value.deliver_no.push({ noId: "" });
+};
+
+const dataHandle = (row, title) => {
+  dialogVisible.value = true;
+  dialogTitle.value = title;
+  if (title == "发货") {
+    ruleForm.value.order_id = row.id;
+  } else if (title == "退款审核") {
+    getRefund(row.refund_id);
+  } else {
+    nextTick(() => {
+      ruleForm.value = JSON.parse(JSON.stringify(row));
+    });
+  }
+};
+
+const getRefund = (refund_id) => {
+  API.activity.getRefundInfo({ refund_id }).then((res) => {
+    ruleForm.value = {
+      refund_id,
+      updated_at: res.data.updated_at,
+      money: res.data.money,
+      refund_img_url: res.data.refund_img_url
+        ? res.data.refund_img_url.split(",")
+        : [],
+      remark: res.data.remark,
+      status: 1,
+      check_remark: "",
+    };
+  });
+};
+
 const showVal = (val) => {
   return val ? val : "-";
 };
@@ -266,6 +441,22 @@ const multipleSelection = ref([]);
 const handleSelectionChange = (val) => {
   console.log(val);
   multipleSelection.value = val;
+};
+
+const cancelFh = (row) => {
+  ElMessageBox.confirm("确定要操作吗？", `系统消息`, {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
+    closeOnClickModal: false,
+  })
+    .then(() => {
+      API.activity.cancelDelivery({ order_id: row.id }).then((res) => {
+        resetForm(false);
+        handleClose();
+        ElMessage.success("操作成功");
+      });
+    })
+    .catch(() => {});
 };
 
 // 查询
@@ -310,6 +501,17 @@ const tableHeader = reactive([
     label: "订单状态",
     prop: "status",
     colType: "column",
+  },
+  {
+    label: "是否退款",
+    prop: "refund_id",
+    colType: "column",
+  },
+  {
+    label: "退款申请时间",
+    prop: "refund_at",
+    colType: "column",
+    width: "170",
   },
   {
     label: "结算状态",
@@ -360,9 +562,15 @@ const tableHeader = reactive([
     width: "170",
   },
   {
+    label: "退款审核时间",
+    prop: "refund_check_at",
+    colType: "column",
+    width: "170",
+  },
+  {
     label: "操作",
     colType: "column",
-    width: "120",
+    width: "150",
     prop: "fixbtn",
     fixed: "right",
   },
@@ -372,9 +580,41 @@ const getTableData = (param) => {
   return API.activity.getOrderList(param).then((res) => res);
 };
 const paginationConfig = reactive({});
+const formRef = ref();
 
+const confirmSubmit = async () => {
+  formRef.value.validate(async (valid) => {
+    if (valid) {
+      let res = "";
+      let params = {
+        ...ruleForm.value,
+        deliver_no: "",
+      };
+      if (dialogTitle.value == "发货") {
+        params.deliver_no = ruleForm.value.deliver_no
+          .map((el) => el.noId)
+          .join(",");
+        res = await API.activity.delivery(params);
+      } else {
+        res = await API.activity.refundCheck(params);
+      }
+      if (res.code == 0) {
+        console.log(res);
+        resetForm(false);
+        handleClose();
+        ElMessage.success("操作成功");
+      }
+    } else {
+      return false;
+    }
+  });
+};
 const handleClose = () => {
   dialogVisible.value = false;
+  nextTick(() => {
+    formRef.value.resetFields();
+    ruleForm.value.refund_id = "";
+  });
 };
 </script>
 
@@ -401,8 +641,20 @@ const handleClose = () => {
     height: 60vh;
     overflow-y: auto;
   }
+  :deep(.add-form) {
+    .el-dialog__body {
+      height: auto;
+    }
+  }
   .dialog-box {
     width: 100%;
+  }
+  .el-form {
+    width: 100%;
+  }
+  .no-item {
+    width: 100%;
+    margin-bottom: 18px;
   }
 }
 </style>

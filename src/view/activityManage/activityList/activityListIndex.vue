@@ -336,6 +336,7 @@ const tableHeader = reactive([
   {
     label: "活动描述",
     prop: "description",
+    width: "200",
   },
   {
     label: "封面配图",
