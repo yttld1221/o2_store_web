@@ -131,6 +131,13 @@ const activity = {
       data
     });
   },
-  
+   // v2结算-批量结算订单
+   batchSettlementOrder(data: any): AxiosPromise<any> {
+    return http({
+      url: '/order/batchSettlementOrder',
+      method: 'POST',
+      data
+    });
+  },
 };
 export default activity;

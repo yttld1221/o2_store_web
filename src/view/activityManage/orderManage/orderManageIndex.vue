@@ -22,7 +22,10 @@
     <div class="listModule">
       <div class="btnsContainer">
         <div class="btns left">
-          <el-button :disabled="!multipleSelection.length" type="primary"
+          <el-button
+            @click="Settlement()"
+            :disabled="!multipleSelection.length"
+            type="primary"
             >批量结算</el-button
           >
         </div>
@@ -60,6 +63,9 @@
         }}</template>
         <template v-slot:column|refund_id="scope">{{
           scope.row.refund_id > 0 ? "是" : "否"
+        }}</template>
+        <template v-slot:column|refund_check_status="scope">{{
+          checkStatus[scope.row.refund_check_status]
         }}</template>
         <template v-slot:column|refund_at="scope">{{
           showVal(scope.row.refund_at)
@@ -214,16 +220,38 @@
               >￥{{ ruleForm.money }}</el-form-item
             >
             <el-form-item label="退款原因">
-              <div>{{ showVal(ruleForm.remark) }}</div>
-              <div
-                class="file-list"
-                v-if="ruleForm.refund_img_url.length"
-              ></div>
+              <div class="refund-reason">
+                <div>{{ showVal(ruleForm.remark) }}</div>
+                <div class="file-list" v-if="ruleForm.refund_img_url.length">
+                  <template v-for="(item, index) in ruleForm.refund_img_url">
+                    <el-image
+                      :key="index"
+                      v-if="getType(item)"
+                      preview-teleported
+                      style="width: 80px; height: 80px"
+                      :src="item"
+                      :zoom-rate="1.2"
+                      :max-scale="7"
+                      :min-scale="0.2"
+                      :preview-src-list="[item]"
+                      :initial-index="0"
+                      fit="cover"
+                    />
+                    <img
+                      @click="perwVideo(item)"
+                      style="width: 80px; height: 80px"
+                      v-else
+                      src="@/assets/img/icon-video.png"
+                      alt=""
+                    />
+                  </template>
+                </div>
+              </div>
             </el-form-item>
-            <el-form-item label="审核意见" prop="status">
+            <el-form-item label="审核结果" prop="status">
               <el-radio-group v-model="ruleForm.status">
-                <el-radio :value="1">同意</el-radio>
-                <el-radio :value="2">拒绝</el-radio>
+                <el-radio :value="2">同意</el-radio>
+                <el-radio :value="3">拒绝</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="审核意见" prop="check_remark">
@@ -247,6 +275,7 @@
         </span>
       </template>
     </el-dialog>
+    <dialogVideo ref="dialogVideoRef" />
   </div>
 </template>
 <script lang="ts" setup name="postIndex">
@@ -264,6 +293,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { useStore } from "vuex";
 import commonTable from "@/components/commonTable.vue";
 import queryHeader from "@/components/queryHeader.vue";
+import dialogVideo from "@/components/dialogVideo.vue";
 import lineRadius from "@/components/lineRadius.vue";
 import { kdList } from "./kuaidi.js";
 import rowsDynamicForm from "@/components/dynamicForm/rowsDynamicForm.vue";
@@ -297,6 +327,12 @@ const selectText = ref({
   4: "已取消",
   5: "待收货",
   6: "已完成",
+});
+const checkStatus = ref({
+  1: "待审核",
+  2: "退款通过",
+  3: "退款拒绝",
+  0: "-",
 });
 
 const dialogVisible = ref(false);
@@ -380,6 +416,11 @@ const formItems = ref([
   },
 ]);
 
+const getType = (url) => {
+  let fileType = url.substring(url.lastIndexOf(".") + 1).toLowerCase();
+  return ["jpg", "jpeg", "png"].includes(fileType);
+};
+
 const formAttrs = ref({
   "label-width": "80px",
 });
@@ -416,7 +457,7 @@ const getRefund = (refund_id) => {
         ? res.data.refund_img_url.split(",")
         : [],
       remark: res.data.remark,
-      status: 1,
+      status: 2,
       check_remark: "",
     };
   });
@@ -424,6 +465,12 @@ const getRefund = (refund_id) => {
 
 const showVal = (val) => {
   return val ? val : "-";
+};
+const dialogVideoRef = ref();
+// 预览
+const perwVideo = (url) => {
+  console.log(111);
+  dialogVideoRef.value.open(url);
 };
 
 const rowsDynamicFormRef = ref();
@@ -457,6 +504,24 @@ const cancelFh = (row) => {
       });
     })
     .catch(() => {});
+};
+
+const Settlement = () => {
+  let tag = multipleSelection.value.every((el) => el.status == 3);
+  if (!tag) {
+    ElMessage.error("存在不符合订单");
+    return;
+  }
+  API.activity
+    .batchSettlementOrder({
+      ids: multipleSelection.value.map((el) => el.id).join(","),
+    })
+    .then((res) => {
+      resetForm(false);
+      multipleSelection.value = [];
+      tableRef.value.clearChoose();
+      ElMessage.success("操作成功");
+    });
 };
 
 // 查询
@@ -506,6 +571,12 @@ const tableHeader = reactive([
     label: "是否退款",
     prop: "refund_id",
     colType: "column",
+  },
+  {
+    label: "退款审核状态",
+    prop: "refund_check_status",
+    colType: "column",
+    width: "150",
   },
   {
     label: "退款申请时间",
@@ -655,6 +726,17 @@ const handleClose = () => {
   .no-item {
     width: 100%;
     margin-bottom: 18px;
+  }
+  .refund-reason {
+    display: flex;
+    flex-direction: column;
+    .file-list {
+      display: flex;
+      .el-image,
+      img {
+        margin-right: 8px;
+      }
+    }
   }
 }
 </style>

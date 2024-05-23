@@ -22,6 +22,7 @@ declare module 'vue' {
     DfSwitch: typeof import('./src/components/dynamicForm/components/DfSwitch.vue')['default']
     DfTimePicker: typeof import('./src/components/dynamicForm/components/DfTimePicker.vue')['default']
     DfTimeSelect: typeof import('./src/components/dynamicForm/components/DfTimeSelect.vue')['default']
+    DialogVideo: typeof import('./src/components/dialogVideo.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCascader: typeof import('element-plus/es')['ElCascader']
