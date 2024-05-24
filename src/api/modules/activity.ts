@@ -99,14 +99,14 @@ const activity = {
       data
     });
   },
-   // v2发货-订单发货
-   delivery(data: any): AxiosPromise<any> {
+  // v2发货-订单发货
+  delivery(data: any): AxiosPromise<any> {
     return http({
       url: '/order/delivery',
       method: 'POST',
       data
     });
-  }, 
+  },
   // v2发货-取消订单发货
   cancelDelivery(data: any): AxiosPromise<any> {
     return http({
@@ -131,10 +131,26 @@ const activity = {
       data
     });
   },
-   // v2结算-批量结算订单
-   batchSettlementOrder(data: any): AxiosPromise<any> {
+  // v2结算-批量结算订单
+  batchSettlementOrder(data: any): AxiosPromise<any> {
     return http({
       url: '/order/batchSettlementOrder',
+      method: 'POST',
+      data
+    });
+  },
+  // v2商家-商家入住审核
+  checkShop(data: any): AxiosPromise<any> {
+    return http({
+      url: '/sundry/checkShop',
+      method: 'POST',
+      data
+    });
+  },
+  // v2商家-根据商家id获取商家详情
+  getShopInfo(data: any): AxiosPromise<any> {
+    return http({
+      url: '/sundry/getShopInfo',
       method: 'POST',
       data
     });

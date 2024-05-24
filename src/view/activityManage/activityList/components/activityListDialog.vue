@@ -508,9 +508,12 @@ onMounted(() => {
       display: none;
     }
   }
-  :deep(.el-dialog__body) {
-    height: 70vh;
-    overflow-y: auto;
+  :deep(.el-dialog) {
+    margin-top: 5vh;
+    .el-dialog__body {
+      height: 70vh;
+      overflow-y: auto;
+    }
   }
 }
 </style>
