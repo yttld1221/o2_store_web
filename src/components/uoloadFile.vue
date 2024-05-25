@@ -11,7 +11,11 @@
               :size="20"
               ><ZoomIn
             /></el-icon>
-            <el-icon @click="handleRemove(index)" color="#FFFFFF" :size="20"
+            <el-icon
+              v-if="!['查看', '审核'].includes(type)"
+              @click="handleRemove(index)"
+              color="#FFFFFF"
+              :size="20"
               ><Delete
             /></el-icon>
           </div>
@@ -53,6 +57,7 @@ const props = defineProps({
     default: 10,
   },
   list: String,
+  type: String,
 });
 
 // eslint-disable-next-line no-undef

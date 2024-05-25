@@ -155,5 +155,29 @@ const activity = {
       data
     });
   },
+  // v2活动-删除
+  setTaskDel(data: any): AxiosPromise<any> {
+    return http({
+      url: '/task/setTaskDel',
+      method: 'POST',
+      data
+    });
+  },
+  // v2活动-审核
+  checkTask(data: any): AxiosPromise<any> {
+    return http({
+      url: '/task/checkTask',
+      method: 'POST',
+      data
+    });
+  },
+  //v2活动-分页获取活动列表数据(总部待审核管理模块)
+  getTaskListForCheck(data: any): AxiosPromise<any> {
+    return http({
+      url: '/task/getTaskListForCheck',
+      method: 'GET',
+      params: data
+    });
+  },
 };
 export default activity;

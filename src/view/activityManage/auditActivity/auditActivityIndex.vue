@@ -1,7 +1,7 @@
 <template>
   <div class="activity-list">
     <div class="queryModule">
-      <queryHeader title="活动管理">
+      <queryHeader title="分部活动审核">
         <template #queryBtns>
           <el-button @click="resetForm(true)">重置</el-button>
           <el-button type="primary" @click="searchForm">查询</el-button>
@@ -22,7 +22,12 @@
     <div class="listModule">
       <div class="btnsContainer">
         <div class="btns left">
-          <el-button type="primary" @click="addActivity()">新增活动</el-button>
+          <el-button
+            :disabled="!multipleSelection.length"
+            type="primary"
+            @click="changeHandle('批量审核')"
+            >批量审核</el-button
+          >
         </div>
       </div>
       <common-table
@@ -67,47 +72,15 @@
           />
         </template>
         <template v-slot:column|fixbtn="scope">
-          <el-button type="primary" link @click="editForm(scope.row.id, '编辑')"
-            >编辑</el-button
-          >
           <el-button type="primary" link @click="editForm(scope.row.id, '查看')"
             >查看</el-button
           >
           <el-button
-            @click="handleClick(scope.row, 'on', 1)"
-            v-if="scope.row.is_on == 2"
-            type="success"
+            v-if="scope.row.check_status == 3"
+            type="primary"
             link
-            >上架</el-button
-          >
-          <el-button
-            @click="handleClick(scope.row, 'on', 2)"
-            v-else
-            type="danger"
-            link
-            >下架</el-button
-          >
-          <el-button
-            @click="handleClick(scope.row, 'hot', 1)"
-            v-if="scope.row.is_hot == 2"
-            type="success"
-            link
-            >开启热门</el-button
-          >
-          <el-button
-            @click="handleClick(scope.row, 'hot', 2)"
-            v-else
-            type="danger"
-            link
-            >关闭热门</el-button
-          >
-
-          <el-button
-            @click="handleClick(scope.row, 'del', 1)"
-            v-if="scope.row.is_on == 2"
-            type="danger"
-            link
-            >删除</el-button
+            @click="changeHandle('审核', scope.row.id)"
+            >审核</el-button
           >
         </template>
         <template v-slot:column|check_status="scope">
@@ -115,20 +88,37 @@
         </template>
       </common-table>
     </div>
+    <auditActivityDialog @resetTable="resetForm" ref="dialogDetail" />
     <el-dialog
       :close-on-click-modal="false"
       :before-close="handleClose"
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="400px"
+      width="450px"
       class="dialogContainer"
     >
-      <div class="dialog-box flex-align">
-        <span>是否{{ dialogTitle == "热门切换" ? "热门" : "上架" }}</span>
-        <el-radio-group v-model="isChoose">
-          <el-radio value="1" size="large">是</el-radio>
-          <el-radio value="2" size="large">否</el-radio>
-        </el-radio-group>
+      <div class="dialog-box">
+        <el-form
+          :rules="rules"
+          ref="formRef"
+          :model="ruleForm"
+          label-width="100px"
+          ><el-form-item label="审核结果" prop="check_status">
+            <el-radio-group v-model="ruleForm.check_status">
+              <el-radio :value="4">同意</el-radio>
+              <el-radio :value="5">拒绝</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="审核意见" prop="check_remark">
+            <el-input
+              :autosize="{ minRows: 4 }"
+              v-model="ruleForm.check_remark"
+              style="width: 100%"
+              type="textarea"
+              placeholder="请输入"
+            />
+          </el-form-item>
+        </el-form>
       </div>
       <template #footer>
         <span class="dialogFooter">
@@ -139,7 +129,6 @@
         </span>
       </template>
     </el-dialog>
-    <activityListDialog @resetTable="resetForm" ref="dialogDetail" />
   </div>
 </template>
 <script lang="ts" setup name="activityListIndex">
@@ -158,7 +147,7 @@ import { useStore } from "vuex";
 import commonTable from "@/components/commonTable.vue";
 import queryHeader from "@/components/queryHeader.vue";
 import lineRadius from "@/components/lineRadius.vue";
-import activityListDialog from "./components/activityListDialog.vue";
+import auditActivityDialog from "./components/auditActivityDialog.vue";
 import rowsDynamicForm from "@/components/dynamicForm/rowsDynamicForm.vue";
 const router = useRouter();
 const route = useRoute();
@@ -179,6 +168,17 @@ const levelText = ref({
   1: "普通会员",
   2: "认证vip会员",
   0: "游客",
+});
+const ruleForm = ref({
+  task_ids: "",
+  check_status: 4,
+  check_remark: "",
+});
+const rules = ref({
+  check_remark: [
+    { required: true, message: "请输入审核意见", trigger: "blur" },
+  ],
+  check_status: [{ required: true, message: "请选择", trigger: "change" }],
 });
 const dialogTitle = ref("");
 const dialogVisible = ref(false);
@@ -302,12 +302,10 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val;
 };
 
-// 热门or上下架
-const changeHandle = (type) => {
-  if (type == "on") {
-    dialogTitle.value = "上架下架";
-  } else {
-    dialogTitle.value = "热门切换";
+const changeHandle = (type, id = "") => {
+  dialogTitle.value = type;
+  if (id) {
+    ruleForm.value.task_ids = id + "";
   }
   dialogVisible.value = true;
 };
@@ -317,6 +315,12 @@ const searchForm = () => {
   tableRef.value.refreshTable();
 };
 const tableHeader = reactive([
+  {
+    label: "",
+    colType: "selection",
+    fixed: "left",
+    "reserve-selection": true,
+  },
   {
     label: "ID",
     prop: "id",
@@ -433,7 +437,7 @@ const tableHeader = reactive([
     label: "操作",
     colType: "column",
     prop: "fixbtn",
-    width: "270",
+    width: "130",
     fixed: "right",
   },
 ]);
@@ -445,13 +449,38 @@ const getTableData = (param) => {
       param[el] = param[el].join(",");
     }
   });
-  return API.activity.getTaskList(param).then((res) => res);
+  return API.activity.getTaskListForCheck(param).then((res) => res);
 };
 const paginationConfig = reactive({});
+const formRef = ref();
 
+const confirmSubmit = async () => {
+  formRef.value.validate(async (valid) => {
+    if (valid) {
+      let params = {
+        ...ruleForm.value,
+      };
+      if (dialogTitle.value == "批量审核") {
+        params.task_ids = multipleSelection.value.map((el) => el.id).join(",");
+      }
+      await API.activity.checkTask(params).then((res) => {
+        console.log(res);
+        resetForm(false);
+        multipleSelection.value = [];
+        tableRef.value.clearChoose();
+        handleClose();
+        ElMessage.success("操作成功");
+      });
+    } else {
+      return false;
+    }
+  });
+};
 const handleClose = () => {
   dialogVisible.value = false;
-  isChoose.value = "1";
+  nextTick(() => {
+    formRef.value.resetFields();
+  });
 };
 const handleClick = (row, key, val) => {
   ElMessageBox.confirm("确定要操作吗？", `系统消息`, {
@@ -480,10 +509,6 @@ const handleClick = (row, key, val) => {
       }
     })
     .catch(() => {});
-};
-
-const changeList = () => {
-  tableRef.value.refreshTable(false);
 };
 
 const getSel = () => {

@@ -45,6 +45,23 @@ const actvity = {
       ]
     },
     {
+      path: '/activityManage/auditActivity',
+      name: 'auditActivity',
+      redirect: '/activityManage/auditActivity/list',
+      component: childMain,
+      meta: {
+        title: '分部活动审核'
+      },
+      children: [
+        {
+          path: '/activityManage/auditActivity/list',
+          name: 'auditActivity',
+          component: () =>
+            import('/src/view/activityManage/auditActivity/auditActivityIndex.vue')
+        },
+      ]
+    },
+    {
       path: '/activityManage/orderManage',
       name: 'orderManage',
       redirect: '/activityManage/orderManage/list',

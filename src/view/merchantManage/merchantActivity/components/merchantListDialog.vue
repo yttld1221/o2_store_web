@@ -31,12 +31,6 @@
             </el-form-item>
           </div>
           <div class="form-item-box flex-align">
-            <el-form-item label="上架" prop="is_on">
-              <el-select v-model="ruleForm.is_on" placeholder="请选择">
-                <el-option label="是" :value="1" />
-                <el-option label="否" :value="2" />
-              </el-select>
-            </el-form-item>
             <el-form-item label="类型" prop="category_id">
               <el-select v-model="ruleForm.category_id" placeholder="请选择">
                 <el-option-group
@@ -51,17 +45,6 @@
                     :value="item.value"
                   />
                 </el-option-group>
-              </el-select>
-            </el-form-item>
-          </div>
-          <div class="form-item-box flex-align">
-            <el-form-item label="客服消息" prop="open_msg_service">
-              <el-select
-                v-model="ruleForm.open_msg_service"
-                placeholder="请选择"
-              >
-                <el-option label="开启" :value="1" />
-                <el-option label="关闭" :value="2" />
               </el-select>
             </el-form-item>
             <el-form-item label="最低会员等级" prop="buy_level">
@@ -209,10 +192,13 @@
             /></el-form-item>
           </div>
           <div class="form-item-box flex-align">
-            <el-form-item label="热门" prop="is_hot">
-              <el-select v-model="ruleForm.is_hot" placeholder="请选择">
-                <el-option label="是" :value="1" />
-                <el-option label="否" :value="2" />
+            <el-form-item label="客服消息" prop="open_msg_service">
+              <el-select
+                v-model="ruleForm.open_msg_service"
+                placeholder="请选择"
+              >
+                <el-option label="开启" :value="1" />
+                <el-option label="关闭" :value="2" />
               </el-select>
             </el-form-item>
             <el-form-item label="活动举办地" prop="addr">
@@ -243,6 +229,17 @@
               clearable
               :show-all-levels="false"
             />
+          </el-form-item>
+          <el-form-item label="提交状态" prop="check_status">
+            <el-radio-group v-model="ruleForm.check_status">
+              <el-radio :value="2">草稿</el-radio>
+              <el-radio :value="3">待审核</el-radio>
+              <template v-if="dialogTitle == '查看'">
+                <el-radio :value="1">无需审核</el-radio>
+                <el-radio :value="4">通过</el-radio>
+                <el-radio :value="5">不通过</el-radio>
+              </template>
+            </el-radio-group>
           </el-form-item>
         </el-form>
       </div>
@@ -289,13 +286,11 @@ const ruleForm = ref({
   begin_time: "",
   end_time: "",
   description: "",
-  is_on: 1,
   original_price: "",
   in_price: "",
   sale_price: "",
   parent_ratio: "",
   grandpa_ratio: "",
-  is_hot: "",
   content_html: "",
   is_product: "",
   category_id: "",
@@ -308,14 +303,15 @@ const ruleForm = ref({
   img_url: "",
   buy_level: 2,
   is_auto_check: 0,
+  check_status: 2,
 });
 const rules = ref({
   title: [{ required: true, message: "请输入名称", trigger: "blur" }],
   description: [{ required: true, message: "请输入活动描述", trigger: "blur" }],
   img_url: [{ required: true, message: "请上传图片", trigger: "blur" }],
   content_html: [{ required: true, message: "请上传图片", trigger: "blur" }],
-  is_on: [{ required: true, message: "请选择", trigger: "change" }],
-  is_hot: [{ required: true, message: "请选择", trigger: "change" }],
+  check_status: [{ required: true, message: "请选择", trigger: "change" }],
+  shop_id: [{ required: true, message: "请选择", trigger: "change" }],
   is_product: [{ required: true, message: "请选择", trigger: "change" }],
   is_auto_check: [{ required: true, message: "请选择", trigger: "change" }],
   is_delivery: [{ required: true, message: "请选择", trigger: "change" }],
@@ -370,14 +366,13 @@ const confirmSubmit = async () => {
         id: formId.value,
         ...ruleForm.value,
         area_codes: area_codes.join(","),
-        shop_id: ruleForm.value.shop_id ? +ruleForm.value.shop_id : 0,
         original_price: changeFloat(ruleForm.value.original_price),
         in_price: changeFloat(ruleForm.value.in_price),
         sale_price: changeFloat(ruleForm.value.sale_price),
         parent_ratio: changeFloat(ruleForm.value.parent_ratio),
         grandpa_ratio: changeFloat(ruleForm.value.grandpa_ratio),
       };
-      API.activity.saveTask(params).then((res) => {
+      API.merchant.saveTaskForChild(params).then((res) => {
         console.log(res);
         ElMessage.success("操作成功");
         handleClose();
@@ -416,8 +411,8 @@ const getSel = () => {
       };
     });
   });
-  API.activity
-    .getShopList({ status: 1, page: 1, pagesize: 1000 })
+  API.merchant
+    .getShopListForChild({ status: 1, page: 1, pagesize: 1000 })
     .then((res) => {
       sjSel.value = res.data.map((el) => {
         return {
@@ -441,7 +436,7 @@ const handleOpen = (title, id = 0) => {
 };
 
 const getDetail = () => {
-  API.activity.getTaskInfo({ task_id: formId.value }).then((res) => {
+  API.merchant.getTaskInfoForChild({ task_id: formId.value }).then((res) => {
     console.log(res);
     let area_codes = "";
     if (res.data.area_codes) {
@@ -460,9 +455,13 @@ const getDetail = () => {
     }
     ruleForm.value = {
       ...res.data,
-      shop_id: res.data.shop_id ? res.data.shop_id : "",
       area_codes,
     };
+    if (dialogTitle.value == "编辑") {
+      ruleForm.value.check_status = [2, 3].includes(res.data.check_status)
+        ? res.data.check_status
+        : 2;
+    }
   });
 };
 

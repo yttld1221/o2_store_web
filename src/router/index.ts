@@ -57,7 +57,50 @@ const routes: Array<RouteRecordRaw> = [
             }
           }
         ]
-      }
+      },
+      {
+        path: '/merchantManage/merchantOrder',
+        name: 'merchantOrder',
+        redirect: '/merchantManage/merchantOrder/list',
+        component: () =>
+          import('/src/view/merchantManage/merchantOrder/merchantOrderIndex.vue').catch(() => { }),
+        meta: { title: '订单列表' },
+        children: [
+          {
+            path: '/merchantManage/merchantOrder/list',
+            name: 'merchantOrderList',
+            component: () =>
+              import('/src/view/merchantManage/merchantOrder/merchantOrderIndex.vue').catch(
+                () => { }
+              ),
+            meta: {
+              title: ''
+            }
+          }
+        ]
+      },
+      
+      {
+        path: '/merchantManage/merchantActivity',
+        name: 'merchantActivity',
+        redirect: '/merchantManage/merchantActivity/list',
+        component: () =>
+          import('/src/view/merchantManage/merchantActivity/merchantListIndex.vue').catch(() => { }),
+        meta: { title: '活动列表' },
+        children: [
+          {
+            path: '/merchantManage/merchantActivity/list',
+            name: 'merchantActivityList',
+            component: () =>
+              import('/src/view/merchantManage/merchantActivity/merchantListIndex.vue').catch(
+                () => { }
+              ),
+            meta: {
+              title: ''
+            }
+          }
+        ]
+      },
     ]
   },
   // 系统管理

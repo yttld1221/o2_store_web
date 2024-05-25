@@ -1,7 +1,7 @@
 <template>
   <div class="activity-list">
     <div class="queryModule">
-      <queryHeader title="活动管理">
+      <queryHeader title="活动列表">
         <template #queryBtns>
           <el-button @click="resetForm(true)">重置</el-button>
           <el-button type="primary" @click="searchForm">查询</el-button>
@@ -74,34 +74,12 @@
             >查看</el-button
           >
           <el-button
-            @click="handleClick(scope.row, 'on', 1)"
-            v-if="scope.row.is_on == 2"
-            type="success"
-            link
-            >上架</el-button
-          >
-          <el-button
             @click="handleClick(scope.row, 'on', 2)"
-            v-else
+            v-if="scope.row.is_on == 1"
             type="danger"
             link
             >下架</el-button
           >
-          <el-button
-            @click="handleClick(scope.row, 'hot', 1)"
-            v-if="scope.row.is_hot == 2"
-            type="success"
-            link
-            >开启热门</el-button
-          >
-          <el-button
-            @click="handleClick(scope.row, 'hot', 2)"
-            v-else
-            type="danger"
-            link
-            >关闭热门</el-button
-          >
-
           <el-button
             @click="handleClick(scope.row, 'del', 1)"
             v-if="scope.row.is_on == 2"
@@ -139,7 +117,7 @@
         </span>
       </template>
     </el-dialog>
-    <activityListDialog @resetTable="resetForm" ref="dialogDetail" />
+    <merchantListDialog @resetTable="resetForm" ref="dialogDetail" />
   </div>
 </template>
 <script lang="ts" setup name="activityListIndex">
@@ -158,7 +136,7 @@ import { useStore } from "vuex";
 import commonTable from "@/components/commonTable.vue";
 import queryHeader from "@/components/queryHeader.vue";
 import lineRadius from "@/components/lineRadius.vue";
-import activityListDialog from "./components/activityListDialog.vue";
+import merchantListDialog from "./components/merchantListDialog.vue";
 import rowsDynamicForm from "@/components/dynamicForm/rowsDynamicForm.vue";
 const router = useRouter();
 const route = useRoute();
@@ -334,6 +312,7 @@ const tableHeader = reactive([
     label: "审核状态",
     prop: "check_status",
     colType: "column",
+    width: "120",
   },
   {
     label: "参与最低会员等级",
@@ -445,7 +424,7 @@ const getTableData = (param) => {
       param[el] = param[el].join(",");
     }
   });
-  return API.activity.getTaskList(param).then((res) => res);
+  return API.merchant.getTaskListForChild(param).then((res) => res);
 };
 const paginationConfig = reactive({});
 
@@ -466,12 +445,9 @@ const handleClick = (row, key, val) => {
       };
       if (key == "on") {
         param["is_on"] = val;
-        res = await API.activity.setTaskUpDown(param);
+        res = await API.merchant.setTaskDownForChild(param);
       } else if (key == "del") {
-        res = await API.activity.setTaskDel(param);
-      } else {
-        param["is_hot"] = val;
-        res = await API.activity.setTaskHot(param);
+        res = await API.merchant.setTaskDelForChild(param);
       }
       console.log(res);
       if (res.code == 0) {
@@ -503,8 +479,8 @@ const getSel = () => {
     });
     console.log(formItems.value[3].options);
   });
-  API.activity
-    .getShopList({ status: 1, page: 1, pagesize: 1000 })
+  API.merchant
+    .getShopListForChild({ status: 1, page: 1, pagesize: 1000 })
     .then((res) => {
       formItems.value[6].options = res.data.map((el) => {
         return {

@@ -31,12 +31,6 @@
             </el-form-item>
           </div>
           <div class="form-item-box flex-align">
-            <el-form-item label="上架" prop="is_on">
-              <el-select v-model="ruleForm.is_on" placeholder="请选择">
-                <el-option label="是" :value="1" />
-                <el-option label="否" :value="2" />
-              </el-select>
-            </el-form-item>
             <el-form-item label="类型" prop="category_id">
               <el-select v-model="ruleForm.category_id" placeholder="请选择">
                 <el-option-group
@@ -51,17 +45,6 @@
                     :value="item.value"
                   />
                 </el-option-group>
-              </el-select>
-            </el-form-item>
-          </div>
-          <div class="form-item-box flex-align">
-            <el-form-item label="客服消息" prop="open_msg_service">
-              <el-select
-                v-model="ruleForm.open_msg_service"
-                placeholder="请选择"
-              >
-                <el-option label="开启" :value="1" />
-                <el-option label="关闭" :value="2" />
               </el-select>
             </el-form-item>
             <el-form-item label="最低会员等级" prop="buy_level">
@@ -134,7 +117,9 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              :style="{ visibility: ruleForm.is_product == 1 ? '' : 'hidden' }"
+              :style="{
+                visibility: ruleForm.is_product == 1 ? '' : 'hidden',
+              }"
               label="进价"
               prop="in_price"
             >
@@ -209,10 +194,13 @@
             /></el-form-item>
           </div>
           <div class="form-item-box flex-align">
-            <el-form-item label="热门" prop="is_hot">
-              <el-select v-model="ruleForm.is_hot" placeholder="请选择">
-                <el-option label="是" :value="1" />
-                <el-option label="否" :value="2" />
+            <el-form-item label="客服消息" prop="open_msg_service">
+              <el-select
+                v-model="ruleForm.open_msg_service"
+                placeholder="请选择"
+              >
+                <el-option label="开启" :value="1" />
+                <el-option label="关闭" :value="2" />
               </el-select>
             </el-form-item>
             <el-form-item label="活动举办地" prop="addr">
@@ -502,6 +490,15 @@ onMounted(() => {
 .activity-detail {
   .form-box {
     padding: 15px 20px;
+    .form-info {
+      position: relative;
+      .mask {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+    }
   }
   .form-item-box {
     & > .el-form-item {

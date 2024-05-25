@@ -108,6 +108,7 @@ import {
 import { useRouter, useRoute } from "vue-router";
 import { ElMessageBox } from "element-plus";
 import { getIncludeList } from "@/utils/utils";
+import { getMenu } from "@/utils/validate";
 import "./Interface/main";
 import Crumbs from "@/layouts/components/crumbs.vue";
 export default {
@@ -151,53 +152,7 @@ export default {
       return data.menuList;
     });
     onMounted(() => {
-      data.menuList = [
-        {
-          label: "欢迎",
-          path: "/home",
-          childNode: [],
-          icon: "hy",
-        },
-        {
-          label: "朋友圈管理",
-          path: "/postManage/list",
-          childNode: [],
-          icon: "pyq",
-        },
-        {
-          label: "小程序用户管理",
-          path: "/wechatUser/list",
-          childNode: [],
-          icon: "xcxyh",
-        },
-        {
-          label: "活动管理",
-          path: "/activityManage",
-          childNode: [
-            {
-              label: "活动分类管理",
-              path: "/activityManage/activityType/list",
-              childNode: [],
-            },
-            {
-              label: "活动管理",
-              path: "/activityManage/activityList/list",
-              childNode: [],
-            },
-            {
-              label: "订单管理",
-              path: "/activityManage/orderManage/list",
-              childNode: [],
-            },
-            {
-              label: "商家管理",
-              path: "/activityManage/businessManage/list",
-              childNode: [],
-            },
-          ],
-          icon: "hdgl",
-        },
-      ];
+      data.menuList = getMenu(data.userInfo.level);
     });
     function funGo(path) {
       data.router.push(path);

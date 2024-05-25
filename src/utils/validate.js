@@ -14,7 +14,7 @@ export function isWscnEmail(str) {
 /* URL验证 */
 export function validateURL(textval) {
   const urlregex =
-      /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+    /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
   return urlregex.test(textval);
 }
 
@@ -56,8 +56,8 @@ export function sortByKey(obj, flag) {
       newObj[v] = obj[v];
     }
     if (
-        obj[v] &&
-        Object.prototype.toString.call(obj[v]) === "[object Object]"
+      obj[v] &&
+      Object.prototype.toString.call(obj[v]) === "[object Object]"
     ) {
       newObj[v] = sortByKey(obj[v], true);
     } else if (obj[v] != null) {
@@ -76,8 +76,8 @@ export function textRule(rule, value, callback) {
 }
 export function descRule(rule, value, callback) {
   var reg = new RegExp(
-      "[\\u4E00-\\u9FFF\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]+$",
-      "g"
+    "[\\u4E00-\\u9FFF\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]+$",
+    "g"
   );
   if (!reg.test(value)) {
     callback(new Error("请输入中文和正确的标点符号"));
@@ -87,8 +87,8 @@ export function descRule(rule, value, callback) {
 }
 export function cnbRule(rule, value, callback) {
   var reg = new RegExp(
-      "[\\u4E00-\\u9FFF\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b0-9]+$",
-      "g"
+    "[\\u4E00-\\u9FFF\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b0-9]+$",
+    "g"
   );
   if (!reg.test(value)) {
     callback(new Error("请输入中文、数字、正确的标点符号"));
@@ -133,7 +133,7 @@ export function digitalCheckRule(rule, value, callback) {
 //身份证校验(非必填)
 export function validateIdCard(rule, value, callback) {
   const reg =
-      /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+    /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
   if (!value) {
     callback();
   } else if (!reg.test(value)) {
@@ -146,7 +146,7 @@ export function validateIdCard(rule, value, callback) {
 //身份证校验(必填)
 export function validateIdCardRequired(rule, value, callback) {
   const reg =
-      /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+    /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
   if (!value) {
     callback(new Error("请输入身份证号"));
   } else if (!reg.test(value)) {
@@ -258,7 +258,7 @@ export function getBirthdateFromIdCardNum(idCardNum) {
 //输入中文或英文
 export function validateChineseOrEnglish(rule, value, callback) {
   const regex = /^[\u4e00-\u9fa5a-zA-Z]+$/;
-  if(!value) {
+  if (!value) {
     callback();
   } else if (!regex.test(value)) {
     callback(new Error("请输入中文或者英文"));
@@ -270,13 +270,90 @@ export function validateChineseOrEnglish(rule, value, callback) {
 //手机号校验
 export function phoneRule(rule, value, callback) {
   const regex = /^1[23456789]\d{9}$/;
-  if(!value) {
+  if (!value) {
     callback();
-  } else if(!regex.test(value)) {
+  } else if (!regex.test(value)) {
     callback(new Error("请输入正确的手机号"));
   } else {
     callback();
   }
+}
+
+//获取菜单
+export function getMenu(level) {
+  let obj = {
+    1: [
+      {
+        label: "欢迎",
+        path: "/home",
+        childNode: [],
+        icon: "hy",
+      },
+      {
+        label: "朋友圈管理",
+        path: "/postManage/list",
+        childNode: [],
+        icon: "pyq",
+      },
+      {
+        label: "小程序用户管理",
+        path: "/wechatUser/list",
+        childNode: [],
+        icon: "xcxyh",
+      },
+      {
+        label: "活动管理",
+        path: "/activityManage",
+        childNode: [
+          {
+            label: "活动分类管理",
+            path: "/activityManage/activityType/list",
+            childNode: [],
+          },
+          {
+            label: "活动管理",
+            path: "/activityManage/activityList/list",
+            childNode: [],
+          },
+          {
+            label: "分部活动审核",
+            path: "/activityManage/auditActivity/list",
+            childNode: [],
+          },
+          {
+            label: "订单管理",
+            path: "/activityManage/orderManage/list",
+            childNode: [],
+          },
+          {
+            label: "商家管理",
+            path: "/activityManage/businessManage/list",
+            childNode: [],
+          },
+        ],
+        icon: "hdgl",
+      },
+    ],
+    2: [{
+      label: "欢迎",
+      path: "/home",
+      childNode: [],
+      icon: "hy",
+    },
+    {
+      label: "订单列表",
+      path: "/merchantManage/merchantOrder/list",
+      childNode: [],
+      icon: "pyq",
+    },
+    {
+      label: "活动列表",
+      path: "/merchantManage/merchantActivity/list",
+      childNode: [],
+      icon: "hdgl",
+    }]
+  }
+  return obj[level]
 }
 
 
