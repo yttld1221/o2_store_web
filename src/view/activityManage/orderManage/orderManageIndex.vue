@@ -113,6 +113,16 @@
             @click="dataHandle(scope.row, '退款审核')"
             >退款审核</el-button
           >
+          <el-button
+            type="primary"
+            v-if="
+              scope.row.refund_id > 0 &&
+              [2, 3].includes(scope.row.refund_check_status)
+            "
+            link
+            @click="dataHandle(scope.row, '退款详情')"
+            >退款详情</el-button
+          >
         </template>
       </common-table>
     </div>
@@ -178,6 +188,17 @@
             <el-form-item label="结算人员姓名">{{
               showVal(ruleForm.settlement_name)
             }}</el-form-item>
+            <el-form-item label="快递公司">{{
+              ruleForm.deliver_company
+                ? getKdName(ruleForm.deliver_company)
+                : "-"
+            }}</el-form-item>
+            <el-form-item label="快递单号">{{
+              showVal(ruleForm.deliver_no)
+            }}</el-form-item>
+            <el-form-item label="发货时间">{{
+              showVal(ruleForm.deliver_at)
+            }}</el-form-item>
           </template>
           <template v-else-if="dialogTitle == '发货'">
             <el-form-item label="快递公司名称" prop="deliver_company">
@@ -187,7 +208,7 @@
               >
                 <el-option
                   :label="item.name"
-                  :value="item.name"
+                  :value="item.name + '-' + item.code"
                   v-for="(item, index) in kdList"
                   :key="index"
                 />
@@ -201,18 +222,32 @@
                 :rules="rules.noId"
                 :key="index"
               >
-                <el-input
-                  style="width: 100%"
-                  placeholder="请输入"
-                  v-model="item.noId"
-                ></el-input>
+                <div style="width: 100%" class="flex-align">
+                  <el-input
+                    style="width: 100%"
+                    placeholder="请输入"
+                    v-model="item.noId"
+                  ></el-input>
+                  <el-icon
+                    style="margin-left: 12px"
+                    color="#F56C6C"
+                    @click="removeKd(index)"
+                    v-if="ruleForm.deliver_no.length > 1"
+                    ><Remove
+                  /></el-icon>
+                </div>
               </el-form-item>
               <el-button type="primary" @click="addNo()"
                 >添加快递单号</el-button
               >
             </el-form-item>
           </template>
-          <template v-else-if="dialogTitle == '退款审核' && ruleForm.refund_id">
+          <template
+            v-else-if="
+              ['退款审核', '退款详情'].includes(dialogTitle) &&
+              ruleForm.refund_id
+            "
+          >
             <el-form-item label="退款申请时间">{{
               ruleForm.updated_at
             }}</el-form-item>
@@ -248,25 +283,35 @@
                 </div>
               </div>
             </el-form-item>
-            <el-form-item label="审核结果" prop="status">
-              <el-radio-group v-model="ruleForm.status">
-                <el-radio :value="2">同意</el-radio>
-                <el-radio :value="3">拒绝</el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="审核意见" prop="check_remark">
-              <el-input
-                :autosize="{ minRows: 4 }"
-                v-model="ruleForm.check_remark"
-                style="width: 100%"
-                type="textarea"
-                placeholder="请输入"
-              />
-            </el-form-item>
+            <template v-if="dialogTitle == '退款审核'">
+              <el-form-item label="审核结果" prop="status">
+                <el-radio-group v-model="ruleForm.status">
+                  <el-radio :value="2">同意</el-radio>
+                  <el-radio :value="3">拒绝</el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item label="审核意见" prop="check_remark">
+                <el-input
+                  :autosize="{ minRows: 4 }"
+                  v-model="ruleForm.check_remark"
+                  style="width: 100%"
+                  type="textarea"
+                  placeholder="请输入"
+                />
+              </el-form-item>
+            </template>
+            <template v-else>
+              <el-form-item label="审核结果">{{
+                ruleForm.status == 2 ? "同意" : "拒绝"
+              }}</el-form-item>
+              <el-form-item label="审核意见">{{
+                showVal(ruleForm.check_remark)
+              }}</el-form-item>
+            </template>
           </template>
         </el-form>
       </div>
-      <template #footer v-if="dialogTitle != '查看详情'">
+      <template #footer v-if="!['退款详情', '查看详情'].includes(dialogTitle)">
         <span class="dialogFooter">
           <el-button @click="handleClose" class="cancelBtn">取消</el-button>
           <el-button type="primary" @click="confirmSubmit" class="confirmBtn"
@@ -429,6 +474,11 @@ const changeModel = (model, value, key) => {
   paramsPage.value = model;
 };
 
+// 删除快递
+const removeKd = (index) => {
+  ruleForm.value.deliver_no.splice(index, 1);
+};
+
 const addNo = () => {
   ruleForm.value.deliver_no.push({ noId: "" });
 };
@@ -438,7 +488,7 @@ const dataHandle = (row, title) => {
   dialogTitle.value = title;
   if (title == "发货") {
     ruleForm.value.order_id = row.id;
-  } else if (title == "退款审核") {
+  } else if (["退款审核", "退款详情"].includes(title)) {
     getRefund(row.refund_id);
   } else {
     nextTick(() => {
@@ -457,7 +507,7 @@ const getRefund = (refund_id) => {
         ? res.data.refund_img_url.split(",")
         : [],
       remark: res.data.remark,
-      status: 2,
+      status: dialogTitle.value == "退款详情" ? res.data.status : 2,
       check_remark: "",
     };
   });
@@ -466,6 +516,13 @@ const getRefund = (refund_id) => {
 const showVal = (val) => {
   return val ? val : "-";
 };
+
+const getKdName = (name) => {
+  if (name) {
+    return name.split("-")[0];
+  }
+};
+
 const dialogVideoRef = ref();
 // 预览
 const perwVideo = (url) => {

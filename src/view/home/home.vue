@@ -14,6 +14,13 @@ const route = useRoute();
 const _this: any = getCurrentInstance();
 const API: any = _this.proxy.$API;
 const message: any = _this.proxy.$Message;
+
+const getSel = () => {
+  API.activity.getCategoryTree({ status: 1 }).then((res) => {});
+};
+onMounted(() => {
+  getSel();
+});
 </script>
 
 <style lang="scss" scoped>

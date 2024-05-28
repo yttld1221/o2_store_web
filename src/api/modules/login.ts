@@ -18,10 +18,18 @@ const login = {
       data
     });
   },
-   // 用户-用户登入
-   logOut(data: any): AxiosPromise<any> {
+  // 用户-用户登入
+  logOut(data: any): AxiosPromise<any> {
     return http({
       url: '/admin/logOut',
+      method: 'POST',
+      data
+    });
+  },
+  // 用户-修改自己密码
+  editPwd(data: any): AxiosPromise<any> {
+    return http({
+      url: '/admin/editPwd',
       method: 'POST',
       data
     });

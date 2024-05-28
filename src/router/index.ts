@@ -104,7 +104,7 @@ const routes: Array<RouteRecordRaw> = [
     ]
   },
   // 系统管理
-  // system,
+  system,
   // //活动管理
   actvity,
   // **********404**********

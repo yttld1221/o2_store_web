@@ -333,6 +333,23 @@ export function getMenu(level) {
         ],
         icon: "hdgl",
       },
+      {
+        label: "管理页面",
+        path: "/systemManage/personalInfo",
+        childNode: [
+          {
+            label: "个人信息",
+            path: "/systemManage/personalInfo",
+            childNode: [],
+          },
+          {
+            label: "首页菜单管理",
+            path: "/systemManage/homeMenu",
+            childNode: [],
+          },
+        ],
+        icon: "gl",
+      },
     ],
     2: [{
       label: "欢迎",
@@ -344,14 +361,25 @@ export function getMenu(level) {
       label: "订单列表",
       path: "/merchantManage/merchantOrder/list",
       childNode: [],
-      icon: "pyq",
+      icon: "dd",
     },
     {
       label: "活动列表",
       path: "/merchantManage/merchantActivity/list",
       childNode: [],
       icon: "hdgl",
-    }]
+    }, {
+      label: "管理页面",
+      path: "/systemManage/personalInfo",
+      childNode: [
+        {
+          label: "个人信息",
+          path: "/systemManage/personalInfo",
+          childNode: [],
+        },
+      ],
+      icon: "gl",
+    },]
   }
   return obj[level]
 }

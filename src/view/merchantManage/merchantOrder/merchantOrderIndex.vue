@@ -178,6 +178,17 @@
             <el-form-item label="结算人员姓名">{{
               showVal(ruleForm.settlement_name)
             }}</el-form-item>
+             <el-form-item label="快递公司">{{
+              ruleForm.deliver_company
+                ? getKdName(ruleForm.deliver_company)
+                : "-"
+            }}</el-form-item>
+            <el-form-item label="快递单号">{{
+              showVal(ruleForm.deliver_no)
+            }}</el-form-item>
+            <el-form-item label="发货时间">{{
+              showVal(ruleForm.deliver_at)
+            }}</el-form-item>
           </template>
           <template v-else-if="dialogTitle == '发货'">
             <el-form-item label="快递公司名称" prop="deliver_company">
@@ -187,7 +198,7 @@
               >
                 <el-option
                   :label="item.name"
-                  :value="item.name"
+                  :value="item.name + '-' + item.code"
                   v-for="(item, index) in kdList"
                   :key="index"
                 />
@@ -201,11 +212,20 @@
                 :rules="rules.noId"
                 :key="index"
               >
-                <el-input
-                  style="width: 100%"
-                  placeholder="请输入"
-                  v-model="item.noId"
-                ></el-input>
+                <div style="width: 100%" class="flex-align">
+                  <el-input
+                    style="width: 100%"
+                    placeholder="请输入"
+                    v-model="item.noId"
+                  ></el-input>
+                  <el-icon
+                    style="margin-left: 12px"
+                    color="#F56C6C"
+                    @click="removeKd(index)"
+                    v-if="ruleForm.deliver_no.length > 1"
+                    ><Remove
+                  /></el-icon>
+                </div>
               </el-form-item>
               <el-button type="primary" @click="addNo()"
                 >添加快递单号</el-button
@@ -295,7 +315,7 @@ import commonTable from "@/components/commonTable.vue";
 import queryHeader from "@/components/queryHeader.vue";
 import dialogVideo from "@/components/dialogVideo.vue";
 import lineRadius from "@/components/lineRadius.vue";
-import { kdList } from "./kuaidi.js";
+import { kdList } from "@/view/activityManage/orderManage/kuaidi.js";
 import rowsDynamicForm from "@/components/dynamicForm/rowsDynamicForm.vue";
 const router = useRouter();
 const route = useRoute();
@@ -429,6 +449,11 @@ const changeModel = (model, value, key) => {
   paramsPage.value = model;
 };
 
+// 删除快递
+const removeKd = (index) => {
+  ruleForm.value.deliver_no.splice(index, 1);
+};
+
 const addNo = () => {
   ruleForm.value.deliver_no.push({ noId: "" });
 };
@@ -461,6 +486,12 @@ const getRefund = (refund_id) => {
       check_remark: "",
     };
   });
+};
+
+const getKdName = (name) => {
+  if (name) {
+    return name.split("-")[0];
+  }
 };
 
 const showVal = (val) => {
