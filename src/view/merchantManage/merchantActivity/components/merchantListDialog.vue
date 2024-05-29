@@ -62,7 +62,7 @@
           >
             <uoloadFile
               :type="dialogTitle"
-              :limit="10"
+              limit="10"
               :list="ruleForm.img_url"
               @uploadChange="(el) => uploadChange(el, 'img_url')"
             />
@@ -215,7 +215,7 @@
           >
             <uoloadFile
               :type="dialogTitle"
-              :limit="1000"
+              limit="1000"
               :list="ruleForm.content_html"
               @uploadChange="(el) => uploadChange(el, 'content_html')"
             />
@@ -372,6 +372,9 @@ const confirmSubmit = async () => {
         parent_ratio: changeFloat(ruleForm.value.parent_ratio),
         grandpa_ratio: changeFloat(ruleForm.value.grandpa_ratio),
       };
+      if(dialogTitle.value == "新增"){
+        params.id=0 
+      }
       API.merchant.saveTaskForChild(params).then((res) => {
         console.log(res);
         ElMessage.success("操作成功");

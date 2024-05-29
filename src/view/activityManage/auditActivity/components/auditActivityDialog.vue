@@ -62,7 +62,7 @@
           >
             <uoloadFile
               :type="dialogTitle"
-              :limit="10"
+              limit="10"
               :list="ruleForm.img_url"
               @uploadChange="(el) => uploadChange(el, 'img_url')"
             />
@@ -217,7 +217,7 @@
           >
             <uoloadFile
               :type="dialogTitle"
-              :limit="1000"
+              limit="1000"
               :list="ruleForm.content_html"
               @uploadChange="(el) => uploadChange(el, 'content_html')"
             />

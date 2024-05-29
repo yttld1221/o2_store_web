@@ -1,26 +1,35 @@
 <template>
   <div class="img-container">
     <div class="img-box" v-if="fileList.length">
-      <div class="img-item" v-for="(item, index) in fileList" :key="index">
-        <img :src="item.url" alt="" />
-        <div class="mask">
-          <div class="btn-box">
-            <el-icon
-              @click="handlePictureCardPreview(item.url)"
-              color="#FFFFFF"
-              :size="20"
-              ><ZoomIn
-            /></el-icon>
-            <el-icon
-              v-if="!['查看', '审核'].includes(type)"
-              @click="handleRemove(index)"
-              color="#FFFFFF"
-              :size="20"
-              ><Delete
-            /></el-icon>
+      <draggable
+        :draggable="type == '查看'"
+        item-key="url"
+        v-model="fileList"
+        @end="draggerEnd()"
+      >
+        <template #item="{ element: item, index }">
+          <div class="img-item">
+            <img :src="item.url" alt="" />
+            <div class="mask">
+              <div class="btn-box">
+                <el-icon
+                  @click="handlePictureCardPreview(item.url)"
+                  color="#FFFFFF"
+                  :size="20"
+                  ><ZoomIn
+                /></el-icon>
+                <el-icon
+                  v-if="!['查看', '审核'].includes(type)"
+                  @click="handleRemove(index)"
+                  color="#FFFFFF"
+                  :size="20"
+                  ><Delete
+                /></el-icon>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </template>
+      </draggable>
     </div>
     <el-upload
       v-if="fileList.length < limit"
@@ -28,7 +37,6 @@
       action
       list-type="picture-card"
       multiple
-      :limit="10"
       :show-file-list="false"
       :before-upload="beforeAvatarUpload"
     >
@@ -42,6 +50,7 @@
   </el-dialog>
 </template>
 <script setup lang='ts'>
+import draggable from "vuedraggable";
 import { onMounted, getCurrentInstance, ref, watch } from "vue";
 const _this: any = getCurrentInstance();
 const API: any = _this.proxy.$API;
@@ -75,6 +84,12 @@ onMounted(() => {
     fileList.value = [];
   }
 });
+
+watch(
+  () => props.type,
+  (newVal) => {}
+);
+
 watch(
   () => props.list,
   (newVal) => {
@@ -91,6 +106,11 @@ watch(
     }
   }
 );
+
+const draggerEnd = (v) => {
+  console.log("draggerEnd", fileList.value);
+  emit("uploadChange", fileList.value.map((el) => el.url).join(","));
+};
 
 const uploadFiles = (file) => {
   let formDatas = new FormData();
@@ -126,14 +146,23 @@ const handlePictureCardPreview = (url) => {
   width: 100%;
   display: inline-flex;
   flex-wrap: wrap;
+  position: relative;
+  .mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
 }
 :deep(.el-upload) {
   width: 148px;
   height: 148px;
 }
 .img-box {
-  display: inline-flex;
-  flex-wrap: wrap;
+  & > div {
+    display: flex;
+    flex-wrap: wrap;
+  }
   .img-item {
     position: relative;
     overflow: hidden;
@@ -181,5 +210,9 @@ const handlePictureCardPreview = (url) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  img {
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>

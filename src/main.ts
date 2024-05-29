@@ -72,12 +72,12 @@ app.component('Debounce', {
   }
 });
 const { MODE, DEV } = import.meta.env;
-if (MODE == 'production') {
-  console.warn = function () {};
-  console.log = function () {};
-  console.error = function () {};
-  console.dir = function () {};
-}
+// if (MODE == 'production') {
+//   console.warn = function () {};
+//   console.log = function () {};
+//   console.error = function () {};
+//   console.dir = function () {};
+// }
 
 // Sentry.init({
 //   app,
