@@ -259,6 +259,11 @@ const tableHeader = reactive([
     prop: "comment_num",
   },
   {
+    label: "发布人实名",
+    prop: "name",
+    width: "100",
+  },
+  {
     label: "发布人昵称",
     prop: "nick_name",
     width: "100",
