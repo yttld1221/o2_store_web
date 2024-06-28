@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import system from './modules/system';
 import actvity from './modules/actvity';
+import finance from './modules/finance';
 import Main from '/src/layouts/main.vue';
 import store from "../store/index";
 const routes: Array<RouteRecordRaw> = [
@@ -29,6 +30,27 @@ const routes: Array<RouteRecordRaw> = [
             name: 'postManageList',
             component: () =>
               import('/src/view/postManage/postIndex.vue').catch(
+                () => { }
+              ),
+            meta: {
+              title: ''
+            }
+          }
+        ]
+      },
+      {
+        path: '/schoolManage',
+        name: 'schoolManage',
+        redirect: '/schoolManage/list',
+        component: () =>
+          import('/src/view/schoolManage/schoolIndex.vue').catch(() => { }),
+        meta: { title: '学校管理' },
+        children: [
+          {
+            path: '/schoolManage/list',
+            name: 'schoolManage',
+            component: () =>
+              import('/src/view/schoolManage/schoolIndex.vue').catch(
                 () => { }
               ),
             meta: {
@@ -79,7 +101,7 @@ const routes: Array<RouteRecordRaw> = [
           }
         ]
       },
-      
+
       {
         path: '/merchantManage/merchantActivity',
         name: 'merchantActivity',
@@ -107,6 +129,8 @@ const routes: Array<RouteRecordRaw> = [
   system,
   // //活动管理
   actvity,
+  // 财务管理
+  finance,
   // **********404**********
   {
     path: '/:catchAll(.*)',

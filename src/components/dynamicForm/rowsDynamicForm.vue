@@ -1,41 +1,38 @@
 <template>
   <el-form
-        class="dynamic-form"
-        ref="formRef"
-        v-bind="formAttrs"
-        :model="model"
-        @submit.prevent
-    >
-      <slot name="form-before" />
-      <template
-          v-for="(row, rowIndex) in rowsFormItems"
-          :key="'row|' + rowIndex"
-      >
-        <el-row :gutter="gutter" class="form-row-bar">
-          <el-col
-              :span="colSpanMethod(item)"
-              v-for="(item, colIndex) in row.children"
-              :key="initCount + '|col|' + (item.prop ? item.prop : colIndex)"
+    class="dynamic-form"
+    ref="formRef"
+    v-bind="formAttrs"
+    :model="model"
+    @submit.prevent
+  >
+    <slot name="form-before" />
+    <template v-for="(row, rowIndex) in rowsFormItems" :key="'row|' + rowIndex">
+      <el-row :gutter="gutter" class="form-row-bar">
+        <el-col
+          :span="colSpanMethod(item)"
+          v-for="(item, colIndex) in row.children"
+          :key="initCount + '|col|' + (item.prop ? item.prop : colIndex)"
+        >
+          <col-form-item
+            v-bind="$props"
+            :model="model"
+            :item="item"
+            @change-value="onChangeValue"
+            @change-label="onChangeLabel"
+            @ajax-start="onAjaxStart"
+            @ajax-end="onAjaxEnd"
+            v-show="!item.transparent"
           >
-            <col-form-item
-                v-bind="$props"
-                :model="model"
-                :item="item"
-                @change-value="onChangeValue"
-                @change-label="onChangeLabel"
-                @ajax-start="onAjaxStart"
-                @ajax-end="onAjaxEnd"
-                v-show="!item.transparent"
-            >
-              <template v-slot:[item.slotName]>
-                <slot v-bind:data="model" :name="item.slotName"></slot>
-              </template>
-            </col-form-item>
-          </el-col>
-        </el-row>
-      </template>
-      <slot name="form-after" />
-    </el-form>
+            <template v-slot:[item.slotName]>
+              <slot v-bind:data="model" :name="item.slotName"></slot>
+            </template>
+          </col-form-item>
+        </el-col>
+      </el-row>
+    </template>
+    <slot name="form-after" />
+  </el-form>
 </template>
 
 <script lang="ts">
@@ -225,6 +222,7 @@ const invokeFormFn = (fnName, ...args) => {
   // 校验是否已渲染
   if (!form) return;
   const fn = form[fnName];
+  console.log(fn);
   if (typeof fn === "function") {
     return fn.apply(form, args);
   }
@@ -243,11 +241,11 @@ const setLocale = computed(() => {
 });
 
 watch(
-    () => props.formData,
-    () => {
-      changeFormData();
-    },
-    { deep: true, immediate: true }
+  () => props.formData,
+  () => {
+    changeFormData();
+  },
+  { deep: true, immediate: true }
 );
 
 let dynamicFormObj = reactive({

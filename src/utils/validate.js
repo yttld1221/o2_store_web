@@ -267,6 +267,17 @@ export function validateChineseOrEnglish(rule, value, callback) {
   }
 }
 
+export function validateBigEnglish(rule, value, callback) {
+  const regex = /^[A-Z]+$/;
+  if (!value) {
+    callback();
+  } else if (!regex.test(value)) {
+    callback(new Error("请输入大写字母"));
+  } else {
+    callback();
+  }
+}
+
 //手机号校验
 export function phoneRule(rule, value, callback) {
   const regex = /^1[23456789]\d{9}$/;
@@ -332,6 +343,24 @@ export function getMenu(level) {
           },
         ],
         icon: "hdgl",
+      },
+      {
+        label: "财务管理",
+        path: "/financeManage",
+        childNode: [
+          {
+            label: "提现管理",
+            path: "/financeManage/withdrawManage/list",
+            childNode: [],
+          },
+        ],
+        icon: "cwgl",
+      },
+      {
+        label: "学校管理",
+        path: "/schoolManage/list",
+        childNode: [],
+        icon: "xxgl",
       },
       {
         label: "管理页面",

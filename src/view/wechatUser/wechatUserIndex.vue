@@ -248,7 +248,7 @@ const formItems = ref([
 const formAttrs = ref({
   "label-width": "90px",
 });
-const paramsPage = ref({ pageSize: 20 });
+const paramsPage = ref({  });
 const changeModel = (model, value, key) => {
   paramsPage.value = model;
 };
@@ -406,7 +406,7 @@ const confirmSubmit = async () => {};
 const getSchoolSel = () => {
   API.wechat.getAllSchool({ status: 1 }).then((res) => {
     console.log(res);
-    formItems.value[6].options = res.data.map((el) => {
+    formItems.value[5].options = res.data.map((el) => {
       return {
         label: el.name,
         value: el.id,

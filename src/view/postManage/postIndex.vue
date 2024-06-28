@@ -184,7 +184,7 @@ const formItems = ref([
 const formAttrs = ref({
   "label-width": "80px",
 });
-const paramsPage = ref({ pageSize: 20 });
+const paramsPage = ref({  });
 const changeModel = (model, value, key) => {
   paramsPage.value = model;
 };

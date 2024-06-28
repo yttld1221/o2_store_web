@@ -270,18 +270,10 @@ const ajaxGetTableDataByPage = async () => {
     }
     loadingIns.value = loadIns;
   }
-  let ajaxParams = {};
-  if (isInquire.value) {
-    ajaxParams = {
-      ...ajaxPageParams.value,
-      ...props.queryParams,
-    };
-  } else {
-    ajaxParams = {
-      ...ajaxPageParams.value,
-    };
-  }
-
+  let ajaxParams = {
+    ...ajaxPageParams.value,
+    ...props.queryParams,
+  };
   //获取func入参
   let dataFun = props.ajaxGetData;
   //完成回调
@@ -317,14 +309,17 @@ let isInquire = ref(false);
 const refreshTable = (isResetPageNum = true) => {
   if (isResetPageNum) {
     pageParams.page = 1;
+    isInquire.value = true;
   }
-  isInquire.value = true;
   ajaxGetTableDataByPage();
 };
-
+const oldParams = ref({});
 onMounted(() => {
   if (props.propsTableData) {
     tableData.value = props.propsTableData;
+  }
+  if (props.queryParams) {
+    oldParams.value = props.queryParams;
   }
   props.immediateLoad && ajaxGetTableDataByPage();
 });
